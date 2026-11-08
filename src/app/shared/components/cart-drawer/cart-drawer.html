@@ -1,0 +1,132 @@
+@if (ui.cartOpen()) {
+  <button
+    class="drawer__backdrop"
+    type="button"
+    (click)="ui.closeCart()"
+    aria-label="Fermer le panier"
+  ></button>
+
+  <aside class="drawer" role="dialog" aria-modal="true" aria-label="Votre panier">
+    <header class="drawer__head">
+      <div>
+        <p class="eyebrow eyebrow--plain">Votre sélection</p>
+        <h2 class="drawer__title">
+          Panier <span>({{ cart.count() }})</span>
+        </h2>
+      </div>
+      <button class="drawer__close" type="button" (click)="ui.closeCart()" aria-label="Fermer le panier">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true">
+          <path d="M5 5l14 14M19 5L5 19" />
+        </svg>
+      </button>
+    </header>
+
+    @if (cart.items().length === 0) {
+      <div class="drawer__empty">
+        <span class="drawer__empty-mark" aria-hidden="true">F</span>
+        <p class="drawer__empty-title">Votre panier est vide.</p>
+        <p class="drawer__empty-text">
+          Il attend encore la pièce qui dira quelque chose de vous.
+        </p>
+        <a
+          class="btn btn--ink"
+          routerLink="/"
+          fragment="collection"
+          (click)="ui.closeCart()"
+        >
+          <span>Découvrir la collection</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <path d="M4 12h15M13 6l6 6-6 6" />
+          </svg>
+        </a>
+      </div>
+    } @else {
+      <div class="drawer__shipping">
+        <p>
+          @if (shippingLeft() > 0) {
+            Plus que <strong>{{ shippingLeft() }} €</strong> pour la livraison offerte.
+          } @else {
+            <strong>Livraison offerte.</strong> Votre commande est en route.
+          }
+        </p>
+        <div class="drawer__bar"><i [style.width.%]="shippingProgress()"></i></div>
+      </div>
+
+      <ul class="drawer__lines">
+        @for (item of cart.items(); track item.slug + '-' + item.size) {
+          <li class="line">
+            <a
+              class="line__thumb"
+              [routerLink]="['/piece', item.product.slug]"
+              (click)="ui.closeCart()"
+              [style.background]="item.product.palette.bg"
+              [attr.aria-label]="item.product.name"
+            >
+              <app-garment [product]="item.product" [animated]="false" />
+            </a>
+
+            <div class="line__body">
+              <div class="line__top">
+                <div>
+                  <h3>
+                    <a [routerLink]="['/piece', item.product.slug]" (click)="ui.closeCart()">
+                      {{ item.product.name }}
+                    </a>
+                  </h3>
+                  <p>{{ item.product.line }} · Taille {{ item.size }}</p>
+                </div>
+                <span class="line__price">{{ item.total }} €</span>
+              </div>
+
+              <div class="line__bottom">
+                <div class="qty">
+                  <button
+                    type="button"
+                    (click)="cart.setQty(item, item.qty - 1)"
+                    [attr.aria-label]="'Diminuer la quantité de ' + item.product.name"
+                  >
+                    −
+                  </button>
+                  <span>{{ item.qty }}</span>
+                  <button
+                    type="button"
+                    (click)="cart.setQty(item, item.qty + 1)"
+                    [attr.aria-label]="'Augmenter la quantité de ' + item.product.name"
+                  >
+                    +
+                  </button>
+                </div>
+                <button class="line__remove" type="button" (click)="remove(item)">Retirer</button>
+              </div>
+            </div>
+          </li>
+        }
+      </ul>
+
+      <footer class="drawer__foot">
+        <div class="drawer__row">
+          <span>Sous-total</span>
+          <span>{{ cart.subtotal() }} €</span>
+        </div>
+        <div class="drawer__row">
+          <span>Livraison</span>
+          <span>{{ cart.shipping() === 0 ? 'Offerte' : cart.shipping() + ' €' }}</span>
+        </div>
+        <div class="drawer__row drawer__row--total">
+          <span>Total</span>
+          <span>{{ cart.total() }} €</span>
+        </div>
+
+        <button class="btn btn--ink btn--block drawer__checkout" type="button" (click)="checkout()">
+          <span>Passer commande</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <path d="M4 12h15M13 6l6 6-6 6" />
+          </svg>
+        </button>
+        <p class="drawer__secure">
+          <span aria-hidden="true">✦</span> Paiement sécurisé · Emballage signature · Retours 30 jours
+        </p>
+      </footer>
+    }
+  </aside>
+}

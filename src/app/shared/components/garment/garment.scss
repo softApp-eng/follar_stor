@@ -1,0 +1,31 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.garment {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 24px 32px rgba(17, 17, 16, 0.18));
+}
+
+.garment.is-floating {
+  animation: float 7.5s ease-in-out infinite;
+}
+
+.garment__label {
+  font-family: var(--sans);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 2.6px;
+  fill: #111110;
+}
+
+.garment__meta {
+  font-family: var(--sans);
+  font-size: 4.4px;
+  letter-spacing: 1.6px;
+  fill: rgba(17, 17, 16, 0.5);
+}

@@ -1,0 +1,82 @@
+<div class="site-head" [class.is-open]="ui.menuOpen()">
+  <div class="topbar">
+    <div class="topbar__inner">
+      <span class="topbar__item"><i aria-hidden="true"></i> Livraison offerte dès 90 €</span>
+      <span class="topbar__item topbar__item--mid">Retouches offertes · Retours 30 jours</span>
+      <a class="topbar__item topbar__link" routerLink="/admin">Panel Admin 🔒</a>
+    </div>
+  </div>
+
+  <header class="header" [class.is-scrolled]="scrolled()" [class.is-open]="ui.menuOpen()">
+    <div class="header__bar container">
+      <a class="header__logo" routerLink="/" (click)="ui.closeMenu()" aria-label="FOLLAR — accueil">
+        <span class="header__mark" aria-hidden="true">F</span>
+        <span class="header__word">FOLLAR</span>
+      </a>
+
+      <nav class="header__nav" aria-label="Navigation principale">
+        @for (link of links; track link.fragment; let i = $index) {
+          <a [routerLink]="['/']" [fragment]="link.fragment" [class.is-first]="i === 0">{{ link.label }}</a>
+        }
+      </nav>
+
+      <div class="header__actions">
+        <a class="header__studio" routerLink="/" fragment="maison">L'atelier</a>
+
+        <button
+          class="header__cart"
+          type="button"
+          (click)="ui.openCart()"
+          [attr.aria-label]="'Ouvrir le panier, ' + cart.count() + ' article(s)'"
+        >
+          <span class="header__cart-label">Panier</span>
+          <span class="header__count">{{ cart.count() }}</span>
+        </button>
+
+        <button
+          class="header__burger"
+          type="button"
+          (click)="ui.toggleMenu()"
+          [attr.aria-expanded]="ui.menuOpen()"
+          aria-label="Ouvrir le menu"
+        >
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+</div>
+
+@if (ui.menuOpen()) {
+  <div class="menu" role="dialog" aria-modal="true" aria-label="Menu">
+    <div class="menu__inner container">
+      <p class="eyebrow">Menu</p>
+
+      <nav class="menu__nav">
+        @for (link of links; track link.fragment; let i = $index) {
+          <a
+            [routerLink]="['/']"
+            [fragment]="link.fragment"
+            (click)="ui.closeMenu()"
+            [style.animation-delay.ms]="100 + i * 60"
+          >
+            <span class="menu__index">0{{ i + 1 }}</span>
+            {{ link.label }}
+          </a>
+        }
+      </nav>
+
+      <div class="menu__foot">
+        <div>
+          <p class="menu__label">Écrivez-nous</p>
+          <a href="mailto:bonjour@follar.paris">bonjour@follar.paris</a>
+        </div>
+        <div>
+          <p class="menu__label">Atelier</p>
+          <p>12 rue de Turenne, Paris 3<sup>e</sup></p>
+        </div>
+      </div>
+    </div>
+  </div>
+}

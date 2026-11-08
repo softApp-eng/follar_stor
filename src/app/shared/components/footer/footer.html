@@ -1,0 +1,67 @@
+<footer class="footer">
+  <div class="container">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <p class="eyebrow">Maison de mode · Paris</p>
+        <p class="footer__statement">
+          Des pièces qui ne s'expliquent pas.<br />
+          <em>Elles se portent.</em>
+        </p>
+        <a class="footer__mail" [href]="'mailto:' + settingsService.settings().contactEmail">
+          {{ settingsService.settings().contactEmail }}
+        </a>
+        <div class="footer__socials" style="margin-top: 16px; display: flex; gap: 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;">
+          @if (settingsService.settings().instagramUrl) {
+            <a [href]="settingsService.settings().instagramUrl" target="_blank" rel="noopener">Instagram</a>
+          }
+          @if (settingsService.settings().pinterestUrl) {
+            <a [href]="settingsService.settings().pinterestUrl" target="_blank" rel="noopener">Pinterest</a>
+          }
+          @if (settingsService.settings().tiktokUrl) {
+            <a [href]="settingsService.settings().tiktokUrl" target="_blank" rel="noopener">TikTok</a>
+          }
+          @if (settingsService.settings().linkedinUrl) {
+            <a [href]="settingsService.settings().linkedinUrl" target="_blank" rel="noopener">LinkedIn</a>
+          }
+        </div>
+      </div>
+
+      <div class="footer__cols">
+        <div class="footer__col">
+          <h3>Collection</h3>
+          <ul>
+            <li><a routerLink="/piece/manteau-laine">Manteau Laine</a></li>
+            <li><a routerLink="/piece/chemise-lin">Chemise Lin</a></li>
+            <li><a routerLink="/piece/trench-coton">Trench Coton</a></li>
+            <li><a routerLink="/" fragment="collection">Toute la collection</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h3>La maison</h3>
+          <ul>
+            <li><a routerLink="/" fragment="maison">Notre histoire</a></li>
+            <li><a routerLink="/" fragment="vestiaire">Le vestiaire</a></li>
+            <li><a routerLink="/" fragment="matieres">Les matières</a></li>
+            <li><a routerLink="/" fragment="contact">Le cercle</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h3>Atelier & Contact</h3>
+          <ul>
+            <li><a>{{ settingsService.settings().atelierAddress }}</a></li>
+            <li><a [href]="'mailto:' + settingsService.settings().contactEmail">{{ settingsService.settings().contactEmail }}</a></li>
+            <li><a routerLink="/admin">Panel Admin (JWT)</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__word" aria-hidden="true">{{ settingsService.settings().siteName }}</div>
+
+    <div class="footer__bottom">
+      <p>© {{ year }} {{ settingsService.settings().siteName }} — Maison de mode. Tous droits réservés.</p>
+      <p class="footer__concept">Atelier de Paris — Sur-mesure & Essentiels.</p>
+      <button type="button" (click)="toTop()">Haut de page <span aria-hidden="true">↑</span></button>
+    </div>
+  </div>
+</footer>

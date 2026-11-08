@@ -1,0 +1,368 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.orbit {
+  --r: clamp(112px, 17vw, 228px);
+  --chip-bg: rgba(11, 10, 8, 0.52);
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  isolation: isolate;
+}
+
+.orbit--detail {
+  --r: clamp(128px, 20vw, 268px);
+}
+
+.orbit--compact {
+  --r: clamp(66px, 26vw, 108px);
+  --chip-bg: rgba(11, 10, 8, 0.35);
+}
+
+/* Aura ------------------------------------------------------------------- */
+.orbit__aura {
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 48%, var(--aura) 0%, transparent 62%);
+  opacity: 0.38;
+  filter: blur(34px);
+  animation: pulseAura 8s ease-in-out infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Rings ------------------------------------------------------------------ */
+.orbit__rings {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.orbit__ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(217, 58, 43, 0.22);
+}
+
+.orbit__ring--a {
+  inset: 9%;
+  border-style: dashed;
+  border-color: rgba(217, 58, 43, 0.32);
+  animation: spin 90s linear infinite;
+}
+
+.orbit__ring--b {
+  inset: 22%;
+  border-color: rgba(245, 240, 230, 0.09);
+}
+
+.orbit__ring--c {
+  inset: 36%;
+  border-color: rgba(217, 58, 43, 0.14);
+  animation: spin 55s linear infinite reverse;
+}
+
+/* Particles -------------------------------------------------------------- */
+.orbit__particles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.orbit__particles i {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--gold-2);
+  opacity: 0.55;
+  box-shadow: 0 0 10px var(--gold);
+  animation: float 9s ease-in-out infinite;
+}
+
+.orbit__particles i:nth-child(1) {
+  top: 14%;
+  left: 24%;
+  animation-delay: -1s;
+}
+.orbit__particles i:nth-child(2) {
+  top: 28%;
+  right: 14%;
+  animation-delay: -3.4s;
+}
+.orbit__particles i:nth-child(3) {
+  bottom: 24%;
+  left: 12%;
+  animation-delay: -5.2s;
+}
+.orbit__particles i:nth-child(4) {
+  bottom: 12%;
+  right: 28%;
+  animation-delay: -2.2s;
+}
+.orbit__particles i:nth-child(5) {
+  top: 52%;
+  left: 6%;
+  width: 2px;
+  height: 2px;
+  animation-delay: -7s;
+}
+.orbit__particles i:nth-child(6) {
+  top: 8%;
+  right: 36%;
+  width: 2px;
+  height: 2px;
+  animation-delay: -4.6s;
+}
+
+/* Garment ---------------------------------------------------------------- */
+.orbit__piece {
+  position: relative;
+  z-index: 2;
+  width: 40%;
+  max-width: 260px;
+  animation: floatSlow 9s ease-in-out infinite;
+}
+
+.orbit--detail .orbit__piece {
+  width: 46%;
+  max-width: 310px;
+}
+
+.orbit--compact .orbit__piece {
+  width: 52%;
+  max-width: 150px;
+}
+
+/* Notes ------------------------------------------------------------------ */
+.orbit__details {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.orbit__slot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: rotate(var(--a)) translate(var(--r)) rotate(calc(-1 * var(--a)));
+  pointer-events: auto;
+}
+
+.orbit__chip {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 14px;
+  border: 1px solid rgba(245, 240, 230, 0.16);
+  border-radius: 999px;
+  background: var(--chip-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--cream);
+  white-space: nowrap;
+  animation: float 6.5s ease-in-out infinite;
+  animation-delay: calc(var(--d) * -1.15s);
+  transition:
+    border-color 0.45s var(--ease),
+    background 0.45s var(--ease),
+    box-shadow 0.45s var(--ease),
+    color 0.45s var(--ease);
+}
+
+.orbit__chip:hover,
+.orbit__chip.is-active {
+  border-color: rgba(239, 128, 116, 0.85);
+  box-shadow:
+    0 0 0 1px rgba(217, 58, 43, 0.16),
+    0 10px 34px rgba(0, 0, 0, 0.3);
+}
+
+.orbit__chip.is-active {
+  background: rgba(217, 58, 43, 0.16);
+}
+
+.orbit__dot {
+  width: 5px;
+  height: 5px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 10px var(--gold);
+  transition: transform 0.45s var(--ease);
+}
+
+.orbit__chip.is-active .orbit__dot {
+  transform: scale(1.5);
+}
+
+.orbit__label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.15;
+  font-size: 9.5px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.orbit__label small {
+  font-size: 6.5px;
+  letter-spacing: 0.28em;
+  color: var(--gold);
+}
+
+/* Caption ---------------------------------------------------------------- */
+.orbit__caption {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  z-index: 5;
+  text-align: center;
+  pointer-events: none;
+  width: max-content;
+  max-width: 90%;
+}
+
+.orbit__tag span {
+  display: block;
+  font-size: 7.5px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: rgba(239, 128, 116, 0.9);
+  margin-bottom: 4px;
+}
+
+.orbit__tag strong {
+  display: block;
+  font-family: var(--serif);
+  font-size: clamp(18px, 2.2vw, 28px);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--cream);
+  animation: fadeUp 0.75s var(--ease) both;
+}
+
+.orbit--compact .orbit__chip {
+  padding: 6px 9px;
+}
+
+/* Light stage (home hero) ------------------------------------------------- */
+.orbit--hero .orbit__ring--a {
+  border-color: rgba(17, 17, 16, 0.16);
+}
+.orbit--hero .orbit__ring--b {
+  border-color: rgba(17, 17, 16, 0.09);
+}
+.orbit--hero .orbit__ring--c {
+  border-color: rgba(217, 58, 43, 0.16);
+}
+
+.orbit--hero .orbit__chip {
+  border-color: var(--line);
+  background: rgba(246, 244, 239, 0.86);
+  color: var(--ink);
+}
+
+.orbit--hero .orbit__chip:hover,
+.orbit--hero .orbit__chip.is-active {
+  border-color: var(--accent);
+  background: rgba(246, 244, 239, 0.96);
+  box-shadow:
+    0 0 0 1px rgba(217, 58, 43, 0.14),
+    0 12px 30px rgba(17, 17, 16, 0.12);
+}
+
+.orbit--hero .orbit__tag span {
+  color: var(--accent);
+}
+
+.orbit--hero .orbit__tag strong {
+  color: var(--ink);
+}
+
+/* Light surface (product page) -------------------------------------------- */
+:host(.orbit--on-light) .orbit__ring--a {
+  border-color: rgba(17, 17, 16, 0.16);
+}
+:host(.orbit--on-light) .orbit__ring--b {
+  border-color: rgba(17, 17, 16, 0.09);
+}
+:host(.orbit--on-light) .orbit__ring--c {
+  border-color: rgba(217, 58, 43, 0.16);
+}
+
+:host(.orbit--on-light) .orbit__chip {
+  border-color: var(--line);
+  background: rgba(246, 244, 239, 0.86);
+  color: var(--ink);
+}
+
+:host(.orbit--on-light) .orbit__chip:hover,
+:host(.orbit--on-light) .orbit__chip.is-active {
+  border-color: var(--accent);
+  background: rgba(246, 244, 239, 0.96);
+  box-shadow:
+    0 0 0 1px rgba(217, 58, 43, 0.14),
+    0 12px 30px rgba(17, 17, 16, 0.12);
+}
+
+:host(.orbit--on-light) .orbit__tag span {
+  color: var(--accent);
+}
+
+:host(.orbit--on-light) .orbit__tag strong {
+  color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  .orbit {
+    --r: clamp(96px, 25vw, 170px);
+  }
+  .orbit--detail {
+    --r: clamp(104px, 28vw, 196px);
+  }
+  .orbit__label {
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .orbit {
+    --r: clamp(82px, 29vw, 116px);
+  }
+  .orbit--detail {
+    --r: clamp(92px, 33vw, 132px);
+  }
+  .orbit__slot:nth-child(n + 4) {
+    display: none;
+  }
+  .orbit__chip {
+    padding: 7px 10px;
+  }
+  .orbit__label {
+    font-size: 7.5px;
+    letter-spacing: 0.12em;
+  }
+  .orbit__label small {
+    font-size: 5.5px;
+  }
+  .orbit__dot {
+    width: 4px;
+    height: 4px;
+  }
+  .orbit__caption {
+    bottom: 2%;
+  }
+}

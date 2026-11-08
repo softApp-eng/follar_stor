@@ -1,0 +1,59 @@
+<article class="card">
+  <a
+    class="card__visual"
+    [style.background]="product().palette.bg"
+    [style.--glow]="product().palette.aura"
+    [routerLink]="['/piece', product().slug]"
+    [attr.aria-label]="'Découvrir ' + product().name + ', ' + product().line"
+  >
+    <span class="card__aura" aria-hidden="true"></span>
+
+    @if (product().badge) {
+      <span class="card__badge">{{ product().badge }}</span>
+    }
+
+    <span class="card__garment">
+      @if (product().imageUrl) {
+        <img [src]="product().imageUrl" [alt]="product().name" style="width:100%; height:100%; object-fit:cover;" />
+      } @else {
+        <app-garment [product]="product()" [animated]="false" />
+      }
+    </span>
+
+    <span class="card__details" aria-hidden="true">
+      @for (detail of details(); track detail.name; let i = $index) {
+        <span class="card__detail" [style.--n]="i">{{ detail.name }}</span>
+      }
+    </span>
+
+    <span class="card__hint">
+      Voir la pièce
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+        <path d="M4 12h15M13 6l6 6-6 6" />
+      </svg>
+    </span>
+  </a>
+
+  <div class="card__info">
+    <div class="card__text">
+      <h3>
+        <a [routerLink]="['/piece', product().slug]">{{ product().name }}</a>
+      </h3>
+      <p>{{ product().line }}</p>
+    </div>
+
+    <div class="card__meta">
+      <span class="card__price">{{ product().price }} €</span>
+      <button
+        class="card__add"
+        type="button"
+        (click)="add()"
+        [attr.aria-label]="'Ajouter ' + product().name + ' en taille M au panier'"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</article>

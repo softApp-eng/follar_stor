@@ -1,0 +1,17 @@
+<a class="skip-link" href="#main">Aller au contenu</a>
+
+<div class="scroll-progress" aria-hidden="true">
+  <i [style.transform]="'scaleX(' + progress() + ')'"></i>
+</div>
+
+<app-preloader />
+<app-header />
+
+<main id="main">
+  <router-outlet />
+</main>
+
+<app-footer />
+<app-cart-drawer />
+<app-toast />
+<app-cursor />

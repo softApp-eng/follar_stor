@@ -1,0 +1,61 @@
+<div
+  class="orbit"
+  [class.orbit--hero]="variant() === 'hero'"
+  [class.orbit--detail]="variant() === 'detail'"
+  [class.orbit--compact]="variant() === 'compact'"
+  [style.--aura]="product().palette.aura"
+>
+  <div class="orbit__aura" aria-hidden="true"></div>
+
+  <div class="orbit__rings" aria-hidden="true">
+    <span class="orbit__ring orbit__ring--a"></span>
+    <span class="orbit__ring orbit__ring--b"></span>
+    <span class="orbit__ring orbit__ring--c"></span>
+  </div>
+
+  <div class="orbit__particles" aria-hidden="true">
+    <i></i><i></i><i></i><i></i><i></i><i></i>
+  </div>
+
+  <div class="orbit__piece">
+    @if (product().imageUrl) {
+      <img [src]="product().imageUrl" [alt]="product().name" style="width:100%; height:100%; object-fit:contain; max-height:340px;" />
+    } @else {
+      <app-garment [product]="product()" />
+    }
+  </div>
+
+  <ul class="orbit__details">
+    @for (detail of details(); track detail.name; let i = $index) {
+      <li class="orbit__slot" [style.--a]="angle(i)" [style.--d]="i">
+        <button
+          type="button"
+          class="orbit__chip"
+          [class.is-active]="active() === i"
+          [attr.aria-pressed]="active() === i"
+          [attr.tabindex]="interactive() ? 0 : -1"
+          (mouseenter)="hover(i)"
+          (focus)="hover(i)"
+          (click)="select(i)"
+        >
+          <span class="orbit__dot" aria-hidden="true"></span>
+          <span class="orbit__label">
+            <small>{{ detail.layer }}</small>
+            {{ detail.name }}
+          </span>
+        </button>
+      </li>
+    }
+  </ul>
+
+  @if (variant() !== 'compact') {
+    <div class="orbit__caption" aria-live="polite">
+      @for (detail of [activeDetail()]; track detail.name) {
+        <div class="orbit__tag">
+          <span>{{ detail.layer }} · {{ product().line }}</span>
+          <strong>{{ detail.name }}</strong>
+        </div>
+      }
+    </div>
+  }
+</div>

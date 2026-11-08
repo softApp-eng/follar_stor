@@ -1,0 +1,245 @@
+:host {
+  display: block;
+}
+
+.card {
+  position: relative;
+  height: 100%;
+}
+
+.card__visual {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--cream-3);
+  transition: box-shadow 0.5s var(--ease);
+}
+
+.card:hover .card__visual {
+  box-shadow: 0 22px 50px rgba(17, 17, 16, 0.18);
+}
+
+.card__aura {
+  position: absolute;
+  inset: 8% 6% 16%;
+  background: radial-gradient(circle at 50% 42%, var(--glow) 0%, transparent 64%);
+  opacity: 0.3;
+  filter: blur(26px);
+  transition: opacity 0.5s var(--ease), transform 0.7s var(--ease);
+}
+
+.card:hover .card__aura {
+  opacity: 0.52;
+  transform: scale(1.06);
+}
+
+.card__badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 3;
+  padding: 5px 8px;
+  background: var(--cream);
+  color: var(--ink);
+  font-size: 7.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.card__garment {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  padding: 8% 0 9%;
+}
+
+.card__garment app-garment {
+  width: 48%;
+  transition: transform 0.7s var(--ease);
+}
+
+.card:hover .card__garment app-garment {
+  transform: translateY(-6px) scale(1.04);
+}
+
+/* Living details on hover --------------------------------------------------- */
+.card__details {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.card__detail {
+  position: absolute;
+  padding: 5px 9px;
+  background: var(--ink);
+  color: var(--cream);
+  font-size: 7.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.4s var(--ease),
+    transform 0.4s var(--ease);
+  transition-delay: calc(var(--n) * 70ms);
+}
+
+.card__detail:nth-child(1) {
+  top: 20%;
+  right: 7%;
+}
+.card__detail:nth-child(2) {
+  top: 42%;
+  left: 6%;
+}
+.card__detail:nth-child(3) {
+  top: 58%;
+  right: 9%;
+}
+
+.card:hover .card__detail {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card__hint {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.4s var(--ease),
+    transform 0.4s var(--ease);
+}
+
+.card__hint svg {
+  width: 12px;
+  height: 12px;
+}
+
+.card:hover .card__hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Info -------------------------------------------------------------------- */
+.card__info {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0 0;
+}
+
+.card__text {
+  min-width: 0;
+}
+
+.card__text h3 {
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.card__text h3 a {
+  transition: color 0.3s var(--ease);
+}
+
+.card__text h3 a:hover {
+  color: var(--accent);
+}
+
+.card__text p {
+  margin-top: 4px;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.card__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.card__price {
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.card__add {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line);
+  border-radius: 1px;
+  color: var(--muted-2);
+  transition:
+    background 0.3s var(--ease),
+    border-color 0.3s var(--ease),
+    color 0.3s var(--ease),
+    transform 0.3s var(--ease);
+}
+
+.card__add svg {
+  width: 13px;
+  height: 13px;
+}
+
+.card__add:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--cream);
+  transform: rotate(90deg);
+}
+
+@media (hover: none) {
+  .card__detail {
+    opacity: 1;
+    transform: none;
+  }
+  .card__hint {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .card__garment app-garment {
+    width: 54%;
+  }
+  .card__detail:nth-child(1) {
+    top: 16%;
+  }
+  .card__badge {
+    top: 8px;
+    left: 8px;
+  }
+  .card__add {
+    width: 26px;
+    height: 26px;
+  }
+}

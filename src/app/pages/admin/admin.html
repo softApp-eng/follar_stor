@@ -1,0 +1,920 @@
+<div class="admin container">
+  <!-- ================= AUTH CHECK ================= -->
+  @if (!auth.isLoggedIn()) {
+    <div class="login-wrapper fade-in">
+      <div class="login-box">
+        <div class="login-brand">
+          <span class="admin__mark">F</span>
+          <div>
+            <p class="eyebrow">Sécurité JWT · {{ settingsService.settings().siteName }}</p>
+            <h1>Administration sécurisée</h1>
+          </div>
+        </div>
+
+        <p class="login-lead">
+          L'accès au panel admin est protégé par authentification JWT. Veuillez vous identifier pour continuer.
+        </p>
+
+        @if (loginError()) {
+          <div class="login-error">
+            Identifiants invalides. Utilisez <strong>admin</strong> / <strong>follar2026</strong>.
+          </div>
+        }
+
+        <form class="login-form" (submit)="handleLogin($event)">
+          <div class="form-group">
+            <label>Identifiant administrateur</label>
+            <input
+              type="text"
+              [value]="loginUsername()"
+              (input)="loginUsername.set($any($event.target).value)"
+              placeholder="admin"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Mot de passe</label>
+            <input
+              type="password"
+              [value]="loginPassword()"
+              (input)="loginPassword.set($any($event.target).value)"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+
+          <button class="btn btn--ink btn--block" type="submit">
+            <span>Se connecter (Générer JWT)</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+              <path d="M4 12h15M13 6l6 6-6 6" />
+            </svg>
+          </button>
+        </form>
+
+        <div class="login-foot">
+          <a routerLink="/">← Retour à la boutique</a>
+          <small>Mode démo Spring Boot / H2 / JWT</small>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <!-- ================= ADMIN HEADER ================= -->
+    <header class="admin__header">
+      <div class="admin__brand">
+        <span class="admin__mark">A</span>
+        <div>
+          <p class="eyebrow">Panel de gestion · {{ settingsService.settings().siteName }} · Session active (JWT)</p>
+          <h1>Administration & Logistique</h1>
+        </div>
+      </div>
+
+      <div class="admin__actions">
+        <button class="btn btn--line" type="button" (click)="logout()">
+          <span>Se déconnecter</span>
+        </button>
+        <a class="btn btn--line" routerLink="/">
+          <span>Voir le site</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <path d="M4 12h15M13 6l6 6-6 6" />
+          </svg>
+        </a>
+      </div>
+    </header>
+
+    <!-- ================= TABS NAV ================= -->
+    <nav class="admin__tabs" role="tablist" aria-label="Sections d'administration">
+      <button
+        type="button"
+        role="tab"
+        [class.is-active]="activeTab() === 'dashboard'"
+        [attr.aria-selected]="activeTab() === 'dashboard'"
+        (click)="setTab('dashboard')"
+      >
+        Tableau de bord
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [class.is-active]="activeTab() === 'articles'"
+        [attr.aria-selected]="activeTab() === 'articles'"
+        (click)="setTab('articles')"
+      >
+        Articles <span>({{ totalArticles() }})</span>
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [class.is-active]="activeTab() === 'categories'"
+        [attr.aria-selected]="activeTab() === 'categories'"
+        (click)="setTab('categories')"
+      >
+        Catégories <span>({{ catalog.categories().length }})</span>
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [class.is-active]="activeTab() === 'orders'"
+        [attr.aria-selected]="activeTab() === 'orders'"
+        (click)="setTab('orders')"
+      >
+        Commandes & Livraison
+        @if (pendingDeliveries() > 0) {
+          <span class="badge-count">{{ pendingDeliveries() }}</span>
+        }
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [class.is-active]="activeTab() === 'appearance'"
+        [attr.aria-selected]="activeTab() === 'appearance'"
+        (click)="setTab('appearance')"
+      >
+        Nom, Couleurs & Style
+      </button>
+    </nav>
+
+    <!-- ================= TAB: DASHBOARD ================= -->
+    @if (activeTab() === 'dashboard') {
+      <div class="admin__content fade-in">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-num">{{ totalRevenue() }} €</span>
+            <span class="stat-label">Chiffre d'affaires cumulé</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">{{ totalOrders() }}</span>
+            <span class="stat-label">Commandes reçues</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">{{ pendingDeliveries() }}</span>
+            <span class="stat-label">À envoyer en livraison</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">{{ totalArticles() }}</span>
+            <span class="stat-label">Articles au catalogue</span>
+          </div>
+        </div>
+
+        <div class="dashboard-quick">
+          <div class="quick-box">
+            <h3>Actions rapides</h3>
+            <div class="quick-actions">
+              <button class="btn btn--ink" type="button" (click)="openAddArticleModal()">
+                <span>+ Ajouter un article</span>
+              </button>
+              <button class="btn btn--line" type="button" (click)="createTestOrder()">
+                <span>Simuler une commande client</span>
+              </button>
+              <button class="btn btn--line" type="button" (click)="setTab('orders')">
+                <span>Voir les commandes en attente</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="quick-box">
+            <h3>Dernières commandes reçues</h3>
+            @if (orderService.orders().length === 0) {
+              <p class="empty-text">Aucune commande pour le moment.</p>
+            } @else {
+              <ul class="mini-orders">
+                @for (o of orderService.orders().slice(0, 3); track o.id) {
+                  <li>
+                    <div>
+                      <strong>{{ o.id }}</strong> — {{ o.customer.fullName }} ({{ o.total }} €)
+                      <small>{{ o.items.length }} article(s) · {{ o.status }}</small>
+                    </div>
+                    <button class="btn-text" type="button" (click)="selectedOrder.set(o); setTab('orders')">
+                      Détails →
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ================= TAB: ARTICLES ================= -->
+    @if (activeTab() === 'articles') {
+      <div class="admin__content fade-in">
+        <div class="section-top">
+          <div>
+            <h2>Gestion des articles</h2>
+            <p>Tous les articles ajoutés s'affichent instantanément sur le site et ouvrent leur page détail au clic.</p>
+          </div>
+          <button class="btn btn--ink" type="button" (click)="openAddArticleModal()">
+            <span>+ Ajouter un article</span>
+          </button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Pièce</th>
+                <th>Nom & Ligne</th>
+                <th>Catégorie</th>
+                <th>Prix</th>
+                <th>Matière</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (product of catalog.products(); track product.slug) {
+                <tr>
+                  <td class="col-thumb">
+                    <div class="thumb-box" [style.background]="product.palette.bg">
+                      <app-garment [product]="product" [animated]="false" />
+                    </div>
+                  </td>
+                  <td>
+                    <strong>{{ product.name }}</strong>
+                    <small>{{ product.line }} · <code class="slug-code">/piece/{{ product.slug }}</code></small>
+                  </td>
+                  <td>
+                    <span class="tag-pill">{{ product.category }}</span>
+                  </td>
+                  <td><strong>{{ product.price }} €</strong></td>
+                  <td><small>{{ product.material }}</small></td>
+                  <td class="col-actions">
+                    <a class="btn-action" [routerLink]="['/piece', product.slug]" target="_blank" title="Voir sur le site">
+                      Voir
+                    </a>
+                    <button class="btn-action" type="button" (click)="openEditArticleModal(product)">
+                      Modifier
+                    </button>
+                    <button class="btn-action" type="button" (click)="printArticle(product)">
+                      Imprimer
+                    </button>
+                    <button class="btn-action btn-action--danger" type="button" (click)="deleteArticle(product.slug, product.name)">
+                      Supprimer
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    <!-- ================= TAB: CATEGORIES ================= -->
+    @if (activeTab() === 'categories') {
+      <div class="admin__content fade-in">
+        <div class="section-top">
+          <div>
+            <h2>Gestion des catégories</h2>
+            <p>Structurez le catalogue de la boutique.</p>
+          </div>
+        </div>
+
+        <form class="category-form" (submit)="addCategory($event)">
+          <input
+            type="text"
+            placeholder="Nom de la nouvelle catégorie (ex: Saisonnier, Souliers...)"
+            [value]="newCategoryName()"
+            (input)="newCategoryName.set($any($event.target).value)"
+            required
+          />
+          <button class="btn btn--ink" type="submit">
+            <span>Ajouter la catégorie</span>
+          </button>
+        </form>
+
+        <ul class="categories-list">
+          @for (cat of catalog.categories(); track cat) {
+            <li>
+              <span><strong>{{ cat }}</strong> <small>{{ catalog.countFor(cat) }} article(s)</small></span>
+              @if (cat !== 'Tous') {
+                <button class="btn-action btn-action--danger" type="button" (click)="deleteCategory(cat)">
+                  Supprimer
+                </button>
+              } @else {
+                <small class="locked-badge">Fixe</small>
+              }
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
+    <!-- ================= TAB: ORDERS & DELIVERY ================= -->
+    @if (activeTab() === 'orders') {
+      <div class="admin__content fade-in">
+        <div class="section-top">
+          <div>
+            <h2>Commandes & Département Livraison</h2>
+            <p>Consultez les informations correctes des commandes et transmettez-les à l'équipe logistique.</p>
+          </div>
+          <button class="btn btn--line" type="button" (click)="createTestOrder()">
+            + Simuler une commande
+          </button>
+        </div>
+
+        @if (orderService.orders().length === 0) {
+          <p class="empty-text">Aucune commande reçue pour le moment. Passez une commande test ou achetez une pièce sur la boutique.</p>
+        } @else {
+          <div class="table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Nº Commande</th>
+                  <th>Date</th>
+                  <th>Client</th>
+                  <th>Articles</th>
+                  <th>Total</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (order of orderService.orders(); track order.id) {
+                  <tr>
+                    <td><strong>{{ order.id }}</strong></td>
+                    <td><small>{{ order.date | date:'dd/MM/yyyy HH:mm' }}</small></td>
+                    <td>
+                      <strong>{{ order.customer.fullName }}</strong>
+                      <small>{{ order.customer.city }} ({{ order.customer.postalCode }})</small>
+                    </td>
+                    <td>
+                      <small>
+                        @for (item of order.items; track item.slug) {
+                          <div>{{ item.qty }}x {{ item.name }} ({{ item.size }})</div>
+                        }
+                      </small>
+                    </td>
+                    <td><strong>{{ order.total }} €</strong></td>
+                    <td>
+                      <span
+                        class="status-badge"
+                        [class.status-new]="order.status === 'Nouveau'"
+                        [class.status-sent]="order.status === 'Envoyé en livraison'"
+                      >
+                        {{ order.status }}
+                      </span>
+                      @if (order.deliveryRef) {
+                        <small class="delivery-ref">Ref: {{ order.deliveryRef }}</small>
+                      }
+                    </td>
+                    <td class="col-actions">
+                      <button class="btn-action" type="button" (click)="selectedOrder.set(order)">
+                        Détails
+                      </button>
+                      @if (order.status === 'Nouveau') {
+                        <button class="btn-action btn-action--primary" type="button" (click)="sendToDelivery(order.id)">
+                          Envoyer en livraison
+                        </button>
+                      }
+                      <button class="btn-action btn-action--danger" type="button" (click)="deleteOrder(order.id)">
+                        Supprimer
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ================= TAB: APPEARANCE & STYLE ================= -->
+    @if (activeTab() === 'appearance') {
+      <div class="admin__content fade-in">
+        <div class="section-top">
+          <div>
+            <h2>Apparence, Réseaux Sociaux & Contact</h2>
+            <p>Personnalisez l'identité de la marque, les liens sociaux et les informations de contact.</p>
+          </div>
+        </div>
+
+        <form class="settings-form" (submit)="saveSettings($event)">
+          <div class="form-group">
+            <label>Nom du site / Marque</label>
+            <input
+              type="text"
+              [value]="settingsForm().siteName"
+              (input)="settingsForm.update(s => ({ ...s, siteName: $any($event.target).value }))"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Slogan principal</label>
+            <input
+              type="text"
+              [value]="settingsForm().tagline"
+              (input)="settingsForm.update(s => ({ ...s, tagline: $any($event.target).value }))"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Adresse e-mail de contact</label>
+            <input
+              type="email"
+              [value]="settingsForm().contactEmail"
+              (input)="settingsForm.update(s => ({ ...s, contactEmail: $any($event.target).value }))"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Adresse de l'atelier</label>
+            <input
+              type="text"
+              [value]="settingsForm().atelierAddress"
+              (input)="settingsForm.update(s => ({ ...s, atelierAddress: $any($event.target).value }))"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Lien Instagram</label>
+            <input
+              type="url"
+              [value]="settingsForm().instagramUrl"
+              (input)="settingsForm.update(s => ({ ...s, instagramUrl: $any($event.target).value }))"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Lien Pinterest</label>
+            <input
+              type="url"
+              [value]="settingsForm().pinterestUrl"
+              (input)="settingsForm.update(s => ({ ...s, pinterestUrl: $any($event.target).value }))"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Lien TikTok</label>
+            <input
+              type="url"
+              [value]="settingsForm().tiktokUrl"
+              (input)="settingsForm.update(s => ({ ...s, tiktokUrl: $any($event.target).value }))"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Lien LinkedIn</label>
+            <input
+              type="url"
+              [value]="settingsForm().linkedinUrl"
+              (input)="settingsForm.update(s => ({ ...s, linkedinUrl: $any($event.target).value }))"
+            />
+          </div>
+
+          <div class="color-grid">
+            <div class="form-group">
+              <label>Couleur d'accent (Rouge / Or)</label>
+              <div class="color-input-row">
+                <input
+                  type="color"
+                  [value]="settingsForm().primaryColor"
+                  (input)="settingsForm.update(s => ({ ...s, primaryColor: $any($event.target).value }))"
+                />
+                <input
+                  type="text"
+                  [value]="settingsForm().primaryColor"
+                  (input)="settingsForm.update(s => ({ ...s, primaryColor: $any($event.target).value }))"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Couleur encre (Texte principal)</label>
+              <div class="color-input-row">
+                <input
+                  type="color"
+                  [value]="settingsForm().inkColor"
+                  (input)="settingsForm.update(s => ({ ...s, inkColor: $any($event.target).value }))"
+                />
+                <input
+                  type="text"
+                  [value]="settingsForm().inkColor"
+                  (input)="settingsForm.update(s => ({ ...s, inkColor: $any($event.target).value }))"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Couleur de fond (Off-white)</label>
+              <div class="color-input-row">
+                <input
+                  type="color"
+                  [value]="settingsForm().bgColor"
+                  (input)="settingsForm.update(s => ({ ...s, bgColor: $any($event.target).value }))"
+                />
+                <input
+                  type="text"
+                  [value]="settingsForm().bgColor"
+                  (input)="settingsForm.update(s => ({ ...s, bgColor: $any($event.target).value }))"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn--ink" type="submit">
+              <span>Enregistrer les modifications</span>
+            </button>
+            <button class="btn btn--line" type="button" (click)="resetSettings()">
+              Réinitialiser par défaut
+            </button>
+          </div>
+        </form>
+      </div>
+    }
+
+    <!-- ================= MODAL: ADD / EDIT ARTICLE ================= -->
+    @if (showArticleModal()) {
+      <div class="modal-backdrop" (click)="showArticleModal.set(false)">
+        <div class="modal-card" (click)="$event.stopPropagation()">
+          <header class="modal-head">
+            <h3>{{ editingSlug() ? 'Modifier l’article' : 'Ajouter un nouvel article' }}</h3>
+            <button type="button" (click)="showArticleModal.set(false)" aria-label="Fermer">×</button>
+          </header>
+
+          <form class="article-form" (submit)="saveArticle($event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Nom de la pièce</label>
+                <input
+                  type="text"
+                  [value]="articleForm().name"
+                  (input)="articleForm.update(f => ({ ...f, name: $any($event.target).value }))"
+                  placeholder="Ex: Veste Velours"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Ligne / Collection</label>
+                <input
+                  type="text"
+                  [value]="articleForm().line"
+                  (input)="articleForm.update(f => ({ ...f, line: $any($event.target).value }))"
+                  placeholder="Ex: Tailoring"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Catégorie</label>
+                <select
+                  [value]="articleForm().category"
+                  (change)="articleForm.update(f => ({ ...f, category: $any($event.target).value }))"
+                >
+                  @for (cat of catalog.categories(); track cat) {
+                    @if (cat !== 'Tous') {
+                      <option [value]="cat">{{ cat }}</option>
+                    }
+                  }
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Silhouette Garment (SVG)</label>
+                <select
+                  [value]="articleForm().garment"
+                  (change)="articleForm.update(f => ({ ...f, garment: $any($event.target).value }))"
+                >
+                  <option value="coat">Manteau (coat)</option>
+                  <option value="shirt">Chemise (shirt)</option>
+                  <option value="jeans">Jean (jeans)</option>
+                  <option value="knit">Pull / Maille (knit)</option>
+                  <option value="trench">Trench (trench)</option>
+                  <option value="tee">T-shirt (tee)</option>
+                  <option value="trousers">Pantalon (trousers)</option>
+                  <option value="bag">Sac (bag)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Prix (€)</label>
+                <input
+                  type="number"
+                  [value]="articleForm().price"
+                  (input)="articleForm.update(f => ({ ...f, price: Number($any($event.target).value) }))"
+                  min="1"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Badge (optionnel)</label>
+                <input
+                  type="text"
+                  [value]="articleForm().badge"
+                  (input)="articleForm.update(f => ({ ...f, badge: $any($event.target).value }))"
+                  placeholder="Ex: Nouveauté, Icône..."
+                />
+              </div>
+
+              <div class="form-group form-group--full">
+                <label>Image de l'article (URL ou Fichier local)</label>
+                <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px;">
+                  <input
+                    type="url"
+                    [value]="articleForm().imageUrl"
+                    (input)="articleForm.update(f => ({ ...f, imageUrl: $any($event.target).value }))"
+                    placeholder="https://images.unsplash.com/... ou URL d'image"
+                    style="flex: 1;"
+                  />
+                  <label class="btn btn--line" style="cursor: pointer; margin: 0; padding: 10px 16px; font-size: 12px; white-space: nowrap;">
+                    <span>📁 Importer une image</span>
+                    <input type="file" accept="image/*" (change)="onFileSelected($event)" style="display: none;" />
+                  </label>
+                </div>
+                @if (articleForm().imageUrl) {
+                  <div style="margin-top: 8px; display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.03); padding: 8px; border-radius: 2px;">
+                    <img [src]="articleForm().imageUrl" alt="Aperçu" style="width: 50px; height: 60px; object-fit: cover; border-radius: 2px;" />
+                    <span style="font-size: 12px; color: rgba(17,17,16,0.7);">Aperçu de l'image de l'article chargé.</span>
+                    <button type="button" class="btn-text" (click)="articleForm.update(f => ({ ...f, imageUrl: '' }))" style="margin-left: auto;">Retirer</button>
+                  </div>
+                }
+              </div>
+
+              <div class="form-group form-group--full">
+                <label>Accroche / Tagline</label>
+                <input
+                  type="text"
+                  [value]="articleForm().tagline"
+                  (input)="articleForm.update(f => ({ ...f, tagline: $any($event.target).value }))"
+                  required
+                />
+              </div>
+
+              <div class="form-group form-group--full">
+                <label>Description courte</label>
+                <textarea
+                  rows="2"
+                  [value]="articleForm().description"
+                  (input)="articleForm.update(f => ({ ...f, description: $any($event.target).value }))"
+                  required
+                ></textarea>
+              </div>
+
+              <div class="form-group form-group--full">
+                <label>Histoire & Provenance</label>
+                <textarea
+                  rows="3"
+                  [value]="articleForm().story"
+                  (input)="articleForm.update(f => ({ ...f, story: $any($event.target).value }))"
+                  required
+                ></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Matière principale</label>
+                <input
+                  type="text"
+                  [value]="articleForm().material"
+                  (input)="articleForm.update(f => ({ ...f, material: $any($event.target).value }))"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Coupe</label>
+                <input
+                  type="text"
+                  [value]="articleForm().fit"
+                  (input)="articleForm.update(f => ({ ...f, fit: $any($event.target).value }))"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Entretien</label>
+                <input
+                  type="text"
+                  [value]="articleForm().care"
+                  (input)="articleForm.update(f => ({ ...f, care: $any($event.target).value }))"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Origine / Atelier</label>
+                <input
+                  type="text"
+                  [value]="articleForm().origin"
+                  (input)="articleForm.update(f => ({ ...f, origin: $any($event.target).value }))"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Saison</label>
+                <input
+                  type="text"
+                  [value]="articleForm().season"
+                  (input)="articleForm.update(f => ({ ...f, season: $any($event.target).value }))"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Couleur AURA (Hex)</label>
+                <input
+                  type="text"
+                  [value]="articleForm().aura"
+                  (input)="articleForm.update(f => ({ ...f, aura: $any($event.target).value }))"
+                  required
+                />
+              </div>
+
+              <div class="form-group form-group--full">
+                <label>Détails (séparés par des virgules: Matières, Coupe, Finition)</label>
+                <input
+                  type="text"
+                  [value]="articleForm().materialDetails"
+                  (input)="articleForm.update(f => ({ ...f, materialDetails: $any($event.target).value }))"
+                  placeholder="Matières (ex: Coton bio, Cachemire)"
+                />
+                <input
+                  type="text"
+                  [value]="articleForm().fitDetails"
+                  (input)="articleForm.update(f => ({ ...f, fitDetails: $any($event.target).value }))"
+                  placeholder="Coupe (ex: Coupe droite, Taille haute)"
+                />
+                <input
+                  type="text"
+                  [value]="articleForm().finishDetails"
+                  (input)="articleForm.update(f => ({ ...f, finishDetails: $any($event.target).value }))"
+                  placeholder="Finitions (ex: Boutons corne, Ourlet double)"
+                />
+              </div>
+            </div>
+
+            <div class="modal-foot">
+              <button class="btn btn--line" type="button" (click)="showArticleModal.set(false)">
+                Annuler
+              </button>
+              <button class="btn btn--ink" type="submit">
+                <span>{{ editingSlug() ? 'Enregistrer les modifications' : 'Publier l’article' }}</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
+
+    <!-- ================= MODAL: ORDER DETAIL ================= -->
+    @if (selectedOrder(); as o) {
+      <div class="modal-backdrop" (click)="selectedOrder.set(null)">
+        <div class="modal-card order-modal" (click)="$event.stopPropagation()">
+          <header class="modal-head">
+            <h3>Détails de la commande {{ o.id }}</h3>
+            <button type="button" (click)="selectedOrder.set(null)" aria-label="Fermer">×</button>
+          </header>
+
+          <div class="order-details-body">
+            <div class="order-info-grid">
+              <div>
+                <p class="eyebrow">Client</p>
+                <p><strong>{{ o.customer.fullName }}</strong></p>
+                <p>{{ o.customer.email }}</p>
+                <p>{{ o.customer.address }}</p>
+                <p>{{ o.customer.postalCode }} {{ o.customer.city }}, {{ o.customer.country }}</p>
+                @if (o.customer.notes) {
+                  <p class="order-notes"><em>Note : {{ o.customer.notes }}</em></p>
+                }
+              </div>
+
+              <div>
+                <p class="eyebrow">Statut & Livraison</p>
+                <p>Statut : <strong>{{ o.status }}</strong></p>
+                <p>Date : {{ o.date | date:'dd/MM/yyyy à HH:mm' }}</p>
+                @if (o.deliveryRef) {
+                  <p>Réf. livraison : <code>{{ o.deliveryRef }}</code></p>
+                }
+                @if (o.sentAt) {
+                  <p>Envoyé le : {{ o.sentAt | date:'dd/MM/yyyy à HH:mm' }}</p>
+                }
+              </div>
+            </div>
+
+            <h4>Articles commandés</h4>
+            <table class="admin-table mini-table">
+              <thead>
+                <tr>
+                  <th>Article</th>
+                  <th>Taille</th>
+                  <th>Quantité</th>
+                  <th>Prix unit.</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of o.items; track item.slug) {
+                  <tr>
+                    <td><strong>{{ item.name }}</strong> <small>{{ item.slug }}</small></td>
+                    <td>{{ item.size }}</td>
+                    <td>{{ item.qty }}</td>
+                    <td>{{ item.unitPrice }} €</td>
+                    <td><strong>{{ item.total }} €</strong></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+
+            <div class="order-summary-foot">
+              <div><span>Sous-total</span> <strong>{{ o.subtotal }} €</strong></div>
+              <div><span>Livraison</span> <strong>{{ o.shipping === 0 ? 'Offerte' : o.shipping + ' €' }}</strong></div>
+              <div class="total-row"><span>Total réglé</span> <strong>{{ o.total }} €</strong></div>
+            </div>
+          </div>
+
+          <div class="modal-foot">
+            @if (o.status === 'Nouveau') {
+              <button class="btn btn--ink" type="button" (click)="sendToDelivery(o.id); selectedOrder.set(null)">
+                <span>Envoyer au département livraison</span>
+              </button>
+            }
+            <button class="btn btn--line" type="button" (click)="selectedOrder.set(null)">
+              Fermer
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ================= MODAL: PRINT ARTICLE SHEET ================= -->
+    @if (printingArticle(); as pa) {
+      <div class="modal-backdrop print-backdrop" (click)="printingArticle.set(null)">
+        <div class="modal-card print-sheet-card" (click)="$event.stopPropagation()">
+          <header class="modal-head print-hide">
+            <h3>Fiche Article — {{ pa.name }}</h3>
+            <button type="button" (click)="printingArticle.set(null)" aria-label="Fermer">×</button>
+          </header>
+
+          <div class="print-sheet-content">
+            <div class="print-header-brand">
+              <div>
+                <h2>FOLLAR — FICHE TECHNIQUE ARTICLE</h2>
+                <p>Édition atelier & logistique</p>
+              </div>
+              <div class="print-ref">REF: {{ pa.slug | uppercase }}</div>
+            </div>
+
+            <div class="print-grid">
+              <div class="print-thumb" [style.background]="pa.palette.bg">
+                <app-garment [product]="pa" [animated]="false" />
+              </div>
+              <div class="print-details-info">
+                <h3>{{ pa.name }}</h3>
+                <p class="print-tagline">« {{ pa.tagline }} »</p>
+                <ul class="print-specs-list">
+                  <li><span>Ligne</span> <strong>{{ pa.line }}</strong></li>
+                  <li><span>Catégorie</span> <strong>{{ pa.category }}</strong></li>
+                  <li><span>Prix public</span> <strong>{{ pa.price }} €</strong></li>
+                  <li><span>Matière</span> <strong>{{ pa.material }}</strong></li>
+                  <li><span>Coupe</span> <strong>{{ pa.fit }}</strong></li>
+                  <li><span>Origine</span> <strong>{{ pa.origin }}</strong></li>
+                  <li><span>Entretien</span> <strong>{{ pa.care }}</strong></li>
+                  <li><span>Saison</span> <strong>{{ pa.season }}</strong></li>
+                  @if (pa.badge) {
+                    <li><span>Badge</span> <strong>{{ pa.badge }}</strong></li>
+                  }
+                </ul>
+              </div>
+            </div>
+
+            <div class="print-text-block">
+              <h4>Description</h4>
+              <p>{{ pa.description }}</p>
+            </div>
+
+            <div class="print-text-block">
+              <h4>Histoire & Confection</h4>
+              <p>{{ pa.story }}</p>
+            </div>
+
+            <div class="print-text-block">
+              <h4>Anatomie & Détails</h4>
+              <ul class="print-bullets">
+                @for (m of pa.details.material; track m) {<li>Matière : {{ m }}</li>}
+                @for (f of pa.details.fit; track f) {<li>Coupe : {{ f }}</li>}
+                @for (fin of pa.details.finish; track fin) {<li>Finition : {{ fin }}</li>}
+              </ul>
+            </div>
+          </div>
+
+          <div class="modal-foot print-hide">
+            <button class="btn btn--line" type="button" (click)="printingArticle.set(null)">
+              Fermer
+            </button>
+            <button class="btn btn--ink" type="button" (click)="triggerWindowPrint()">
+              <span>Imprimer la fiche (PDF / Papier)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>

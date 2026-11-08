@@ -1,0 +1,17 @@
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1002;
+  height: 2px;
+  pointer-events: none;
+}
+
+.scroll-progress i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(to right, var(--gold), var(--gold-2));
+  transform-origin: left center;
+  transition: transform 0.1s linear;
+}
