@@ -1,6 +1,5 @@
 .admin {
-  padding-top: 100px;
-  padding-bottom: 120px;
+  padding: 100px var(--pad) 120px;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -32,7 +31,7 @@
     font-size: 22px;
     font-weight: 400;
     text-transform: uppercase;
-    font-family: var(--font-display, 'Jost', sans-serif);
+    font-family: var(--display);
     margin: 0;
   }
 }
@@ -107,7 +106,7 @@
     font-size: 28px;
     font-weight: 400;
     letter-spacing: -0.02em;
-    font-family: var(--font-display, 'Jost', sans-serif);
+    font-family: var(--display);
     text-transform: uppercase;
     margin: 0;
   }
@@ -117,11 +116,11 @@
   width: 44px;
   height: 44px;
   background: var(--ink);
-  color: var(--offwhite);
+  color: var(--cream);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-display, 'Jost', sans-serif);
+  font-family: var(--display);
   font-weight: 600;
   font-size: 20px;
 }
@@ -138,7 +137,7 @@
     background: transparent;
     border: none;
     padding: 12px 20px;
-    font-family: var(--font-display, 'Jost', sans-serif);
+    font-family: var(--display);
     font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -163,7 +162,7 @@
         left: 0;
         right: 0;
         height: 2px;
-        background: var(--red);
+        background: var(--accent);
       }
     }
 
@@ -179,7 +178,7 @@
     }
 
     .badge-count {
-      background: var(--red);
+      background: var(--accent);
       color: #fff;
     }
   }
@@ -201,7 +200,7 @@
 
 .stat-num {
   display: block;
-  font-family: var(--font-display, 'Jost', sans-serif);
+  font-family: var(--display);
   font-size: 32px;
   font-weight: 500;
   letter-spacing: -0.02em;
@@ -282,7 +281,7 @@
     text-transform: uppercase;
     letter-spacing: -0.01em;
     margin-bottom: 6px;
-    font-family: var(--font-display, 'Jost', sans-serif);
+    font-family: var(--display);
   }
 
   p {
@@ -311,7 +310,7 @@
   }
 
   th {
-    font-family: var(--font-display, 'Jost', sans-serif);
+    font-family: var(--display);
     text-transform: uppercase;
     font-size: 11px;
     letter-spacing: 0.1em;
@@ -337,8 +336,77 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: scale(0.4);
-  transform-origin: center;
+
+  app-garment {
+    transform: scale(0.42);
+    transform-origin: center;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.section-top__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.article-toolbar {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.article-toolbar__search {
+  display: flex;
+  align-items: center;
+  flex: 1 1 280px;
+  gap: 10px;
+  padding: 0 14px;
+  background: #fff;
+  border: 1px solid rgba(17, 17, 16, 0.18);
+  border-radius: 2px;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    color: rgba(17, 17, 16, 0.45);
+    flex: none;
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 14px;
+  }
+}
+
+.article-toolbar__select {
+  min-width: 190px;
+  padding: 12px 14px;
+  border: 1px solid rgba(17, 17, 16, 0.18);
+  border-radius: 2px;
+  background: #fff;
+  font-size: 13px;
+  outline: none;
+}
+
+.btn-action--upload {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .slug-code {
@@ -382,8 +450,8 @@
   }
 
   &--primary {
-    background: var(--red);
-    border-color: var(--red);
+    background: var(--accent);
+    border-color: var(--accent);
     color: #fff;
 
     &:hover {
@@ -406,7 +474,7 @@
 .btn-text {
   background: none;
   border: none;
-  color: var(--red);
+  color: var(--accent);
   cursor: pointer;
   font-weight: 500;
   font-size: 13px;
@@ -512,7 +580,7 @@
 
   label {
     font-size: 12px;
-    font-family: var(--font-display, 'Jost', sans-serif);
+    font-family: var(--display);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: rgba(17, 17, 16, 0.7);
@@ -606,7 +674,7 @@
     font-size: 18px;
     font-weight: 500;
     text-transform: uppercase;
-    font-family: var(--font-display, 'Jost', sans-serif);
+    font-family: var(--display);
     margin: 0;
   }
 
@@ -662,7 +730,7 @@
 
 .order-notes {
   margin-top: 8px !important;
-  color: var(--red);
+  color: var(--accent);
 }
 
 .mini-table {
@@ -714,7 +782,7 @@
 
   h2 {
     font-size: 16px;
-    font-family: var(--font-display, 'Jost', sans-serif);
+    font-family: var(--display);
     text-transform: uppercase;
     margin: 0 0 4px 0;
   }
@@ -755,7 +823,7 @@
 .print-details-info {
   h3 {
     font-size: 20px;
-    font-family: var(--font-display, 'Jost', sans-serif);
+    font-family: var(--display);
     text-transform: uppercase;
     margin: 0 0 6px 0;
   }
@@ -799,7 +867,7 @@
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    font-family: var(--font-display, 'Jost', sans-serif);
+    font-family: var(--display);
     margin: 0 0 6px 0;
     color: rgba(17,17,16,0.6);
   }
@@ -840,5 +908,205 @@
   }
   .print-hide {
     display: none !important;
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVE — tablette & mobile
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .admin {
+    padding-top: 92px;
+    padding-bottom: 90px;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 12px 14px;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .section-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .section-top__actions {
+    width: 100%;
+  }
+
+  .section-top__actions .btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .stat-card {
+    padding: 18px;
+  }
+
+  .stat-num {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin {
+    padding-top: 84px;
+    padding-bottom: 70px;
+  }
+
+  .admin__brand h1 {
+    font-size: 22px;
+  }
+
+  .admin__tabs {
+    margin-bottom: 26px;
+  }
+
+  .admin__tabs button {
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+
+  .category-form,
+  .settings-form {
+    flex-direction: column;
+    padding: 20px;
+    max-width: 100%;
+  }
+
+  .categories-list {
+    max-width: 100%;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .order-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .article-toolbar__select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .modal-backdrop {
+    padding: 10px;
+    align-items: flex-end;
+  }
+
+  .modal-card {
+    max-height: 92vh;
+    padding: 20px;
+  }
+
+  .modal-foot {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .modal-foot .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-table {
+    font-size: 12px;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 10px;
+  }
+
+  .col-thumb {
+    width: 50px;
+  }
+
+  .thumb-box {
+    width: 40px;
+    height: 50px;
+  }
+
+  .col-actions {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .btn-action {
+    padding: 5px 9px;
+    font-size: 11px;
+  }
+
+  .categories-list li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .order-summary-foot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .print-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-box {
+    padding: 24px 20px;
+  }
+
+  .admin__mark {
+    width: 38px;
+    height: 38px;
+    font-size: 17px;
+  }
+
+  .admin__brand h1 {
+    font-size: 19px;
+  }
+
+  .admin__tabs button {
+    padding: 9px 10px;
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+  }
+
+  .article-toolbar {
+    gap: 8px;
+  }
+
+  .stat-num {
+    font-size: 22px;
   }
 }

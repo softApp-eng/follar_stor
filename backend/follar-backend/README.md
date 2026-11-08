@@ -1,18 +1,35 @@
-# FOLLAR Spring Boot & H2 Backend
+# FOLLAR Spring Boot Backend
 
-This backend provides REST APIs for the FOLLAR fashion boutique, including:
-- **JWT Authentication** (`/api/auth/login`, `/api/auth/register`)
-- **Products & Categories Management** (`/api/products`, `/api/categories`)
-- **Orders & Delivery Department Queue** (`/api/orders`)
-- **H2 In-Memory Database** with Console at `/h2-console`
+API Spring Boot 3 utilisée par la boutique FOLLAR.
 
-## Running the Backend
+## Stockage des images
 
-1. Ensure you have Java 17+ installed.
-2. Navigate to `backend/follar-backend`.
-3. Run with Maven:
-   ```bash
-   mvn spring-boot:run
-   ```
-4. The server runs on `http://localhost:8080`.
-5. H2 Database Console is available at `http://localhost:8080/h2-console` (JDBC URL: `jdbc:h2:mem:follardb`, User: `sa`, Password: `password`).
+Les photos importées depuis le panneau d'administration sont enregistrées
+directement dans le projet :
+
+```
+backend/follar-backend/uploads/
+```
+
+- `POST /api/images` (multipart, champ `file`) renvoie `{ "url": "/uploads/<fichier>" }`
+- `GET /uploads/<fichier>` sert l'image
+- formats acceptés : jpg, jpeg, png, webp, gif, avif — 10 Mo maximum
+- CORS ouvert pour le serveur Angular (`http://localhost:4200` et `http://127.0.0.1:4200`)
+
+## Démarrage
+
+```bash
+mvn spring-boot:run
+```
+
+Le serveur écoute sur `http://localhost:8080`.
+
+La console H2 reste disponible sur `http://localhost:8080/h2-console`
+(JDBC URL : `jdbc:h2:mem:follardb`, utilisateur : `sa`, mot de passe : `password`).
+
+## Configuration
+
+Voir `src/main/resources/application.properties` :
+
+- `follar.uploads.dir=uploads` — dossier de stockage des images
+- `spring.servlet.multipart.max-file-size=10MB`

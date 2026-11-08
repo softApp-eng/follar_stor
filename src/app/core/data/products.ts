@@ -19,6 +19,7 @@ export const PRODUCTS: Product[] = [
     origin: 'Tissé au Portugal',
     season: 'Automne · Hiver',
     badge: 'Icône',
+    imageUrl: '/images/articles/manteau-laine.jpg',
     palette: {
       aura: '#c9a06a',
       fabricA: '#b07d4e',
@@ -49,6 +50,7 @@ export const PRODUCTS: Product[] = [
     care: 'Lavage 30°',
     origin: 'Tissé en France',
     season: 'Printemps · Été',
+    imageUrl: '/images/articles/chemise-lin.jpg',
     palette: {
       aura: '#a9bfd4',
       fabricA: '#cad9e5',
@@ -80,6 +82,7 @@ export const PRODUCTS: Product[] = [
     origin: 'Denim japonais',
     season: 'Toute l’année',
     badge: 'Nouveauté',
+    imageUrl: '/images/articles/jean-droit.jpg',
     palette: {
       aura: '#5b7ea8',
       fabricA: '#3f6088',
@@ -110,6 +113,7 @@ export const PRODUCTS: Product[] = [
     care: 'Lavage main',
     origin: 'Filé en Italie',
     season: 'Automne · Hiver',
+    imageUrl: '/images/articles/pull-merinos.jpg',
     palette: {
       aura: '#d8c6a8',
       fabricA: '#dccdb4',
@@ -141,6 +145,7 @@ export const PRODUCTS: Product[] = [
     origin: 'Tissé au Portugal',
     season: 'Printemps · Automne',
     badge: 'Édition limitée',
+    imageUrl: '/images/articles/trench-coton.jpg',
     palette: {
       aura: '#cbb894',
       fabricA: '#c6af86',
@@ -171,6 +176,7 @@ export const PRODUCTS: Product[] = [
     care: 'Lavage 30°',
     origin: 'Tricoté au Portugal',
     season: 'Toute l’année',
+    imageUrl: '/images/articles/tee-coton-lourd.jpg',
     palette: {
       aura: '#d8d2c6',
       fabricA: '#f6f4ef',
@@ -201,6 +207,7 @@ export const PRODUCTS: Product[] = [
     care: 'Nettoyage à sec',
     origin: 'Confectionné au Portugal',
     season: 'Automne · Hiver',
+    imageUrl: '/images/articles/pantalon-plisse.jpg',
     palette: {
       aura: '#8a8f98',
       fabricA: '#4e545e',
@@ -232,6 +239,7 @@ export const PRODUCTS: Product[] = [
     origin: 'Cuir toscan',
     season: 'Toute l’année',
     badge: 'Nouveauté',
+    imageUrl: '/images/articles/sac-cabas.jpg',
     palette: {
       aura: '#c49a63',
       fabricA: '#ab7b47',

@@ -1,6 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#0b0a08"/>
-  <path d="M25 14h14v6l4 5v23a6 6 0 0 1-6 6H27a6 6 0 0 1-6-6V25l4-5z" fill="none" stroke="#c9a35c" stroke-width="2.5"/>
-  <path d="M24 32h16v14a4 4 0 0 1-4 4h-8a4 4 0 0 1-4-4z" fill="#c9a35c" opacity=".55"/>
-  <rect x="27" y="8" width="10" height="6" rx="2" fill="#c9a35c"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="FOLLAR">
+  <rect width="64" height="64" rx="12" fill="#111110"/>
+  <path
+    d="M23 14h22v7H31v9h12v7H31v13h-8z"
+    fill="#f6f4ef"
+  />
+  <rect x="45" y="14" width="5" height="5" fill="#d93a2b"/>
 </svg>

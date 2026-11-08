@@ -202,18 +202,52 @@
         <div class="section-top">
           <div>
             <h2>Gestion des articles</h2>
-            <p>Tous les articles ajoutés s'affichent instantanément sur le site et ouvrent leur page détail au clic.</p>
+            <p>
+              {{ catalog.products().length }} article(s) · {{ productsWithPhoto() }} avec photo.
+              Toute modification s'applique immédiatement sur le site.
+            </p>
           </div>
-          <button class="btn btn--ink" type="button" (click)="openAddArticleModal()">
-            <span>+ Ajouter un article</span>
-          </button>
+          <div class="section-top__actions">
+            <button class="btn btn--line" type="button" (click)="resetCatalog()">
+              <span>Réinitialiser le catalogue</span>
+            </button>
+            <button class="btn btn--ink" type="button" (click)="openAddArticleModal()">
+              <span>+ Ajouter un article</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="article-toolbar">
+          <label class="article-toolbar__search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+            </svg>
+            <input
+              type="search"
+              placeholder="Rechercher un article, une matière..."
+              [value]="articleSearch()"
+              (input)="articleSearch.set($any($event.target).value)"
+            />
+          </label>
+          <select
+            class="article-toolbar__select"
+            [value]="articleCategoryFilter()"
+            (change)="articleCategoryFilter.set($any($event.target).value)"
+          >
+            <option value="Tous">Toutes les catégories</option>
+            @for (cat of catalog.categories(); track cat) {
+              @if (cat !== 'Tous') {
+                <option [value]="cat">{{ cat }}</option>
+              }
+            }
+          </select>
         </div>
 
         <div class="table-wrap">
           <table class="admin-table">
             <thead>
               <tr>
-                <th>Pièce</th>
+                <th>Photo</th>
                 <th>Nom & Ligne</th>
                 <th>Catégorie</th>
                 <th>Prix</th>
@@ -222,11 +256,15 @@
               </tr>
             </thead>
             <tbody>
-              @for (product of catalog.products(); track product.slug) {
+              @for (product of filteredAdminProducts(); track product.slug) {
                 <tr>
                   <td class="col-thumb">
                     <div class="thumb-box" [style.background]="product.palette.bg">
-                      <app-garment [product]="product" [animated]="false" />
+                      @if (product.imageUrl) {
+                        <img [src]="product.imageUrl" [alt]="product.name" loading="lazy" />
+                      } @else {
+                        <app-garment [product]="product" [animated]="false" />
+                      }
                     </div>
                   </td>
                   <td>
@@ -245,12 +283,27 @@
                     <button class="btn-action" type="button" (click)="openEditArticleModal(product)">
                       Modifier
                     </button>
+                    <label class="btn-action btn-action--upload" title="Remplacer la photo">
+                      <span>Photo</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        (change)="onRowImageSelected($event, product.slug)"
+                        hidden
+                      />
+                    </label>
                     <button class="btn-action" type="button" (click)="printArticle(product)">
                       Imprimer
                     </button>
                     <button class="btn-action btn-action--danger" type="button" (click)="deleteArticle(product.slug, product.name)">
                       Supprimer
                     </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="empty-text">
+                    Aucun article ne correspond à votre recherche.
                   </td>
                 </tr>
               }

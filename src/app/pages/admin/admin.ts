@@ -5,6 +5,7 @@ import { CatalogService } from '../../core/services/catalog.service';
 import { OrderService, Order } from '../../core/services/order.service';
 import { SettingsService } from '../../core/services/settings.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ImageStorageService } from '../../core/services/image-storage.service';
 import { UiService } from '../../core/services/ui.service';
 import { Product, GarmentType } from '../../core/models/product';
 import { GarmentComponent } from '../../shared/components/garment/garment';
@@ -22,6 +23,7 @@ export class AdminComponent {
   readonly orderService = inject(OrderService);
   readonly settingsService = inject(SettingsService);
   readonly auth = inject(AuthService);
+  readonly images = inject(ImageStorageService);
   readonly ui = inject(UiService);
 
   readonly activeTab = signal<AdminTab>('dashboard');
@@ -85,6 +87,29 @@ export class AdminComponent {
   });
 
   readonly showArticleModal = signal(false);
+
+  // --- ARTICLE LIST FILTERS ---
+  readonly articleSearch = signal('');
+  readonly articleCategoryFilter = signal('Tous');
+
+  readonly filteredAdminProducts = computed(() => {
+    const query = this.articleSearch().trim().toLowerCase();
+    const category = this.articleCategoryFilter();
+    return this.catalog.products().filter((product) => {
+      const matchesCategory = category === 'Tous' || product.category === category;
+      const matchesQuery =
+        !query ||
+        product.name.toLowerCase().includes(query) ||
+        product.slug.toLowerCase().includes(query) ||
+        product.line.toLowerCase().includes(query) ||
+        product.material.toLowerCase().includes(query);
+      return matchesCategory && matchesQuery;
+    });
+  });
+
+  readonly productsWithPhoto = computed(
+    () => this.catalog.products().filter((product) => Boolean(product.imageUrl)).length,
+  );
 
   // --- CATEGORY STATE ---
   readonly newCategoryName = signal('');
@@ -257,19 +282,47 @@ export class AdminComponent {
     }
   }
 
-  onFileSelected(event: Event): void {
+  async onFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        if (result) {
-          this.articleForm.update((f) => ({ ...f, imageUrl: result }));
-          this.ui.showToast('Image chargée avec succès.');
-        }
-      };
-      reader.readAsDataURL(file);
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      const imageUrl = await this.images.store(file);
+      this.articleForm.update((f) => ({ ...f, imageUrl }));
+      this.ui.showToast('Image enregistrée dans le projet.');
+    } catch (error) {
+      this.ui.showToast(error instanceof Error ? error.message : 'Import de l’image impossible.');
+    } finally {
+      input.value = '';
+    }
+  }
+
+  /** Replace a product photo directly from the articles table. */
+  async onRowImageSelected(event: Event, slug: string): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      const imageUrl = await this.images.store(file);
+      this.catalog.updateProductImage(slug, imageUrl);
+      this.ui.showToast('Image de l’article mise à jour.');
+    } catch (error) {
+      this.ui.showToast(error instanceof Error ? error.message : 'Import de l’image impossible.');
+    } finally {
+      input.value = '';
+    }
+  }
+
+  resetCatalog(): void {
+    if (
+      confirm(
+        'Réinitialiser tout le catalogue avec les articles et images d’origine ? Les ajouts et modifications locales seront perdus.',
+      )
+    ) {
+      this.catalog.resetProducts();
+      this.articleSearch.set('');
+      this.articleCategoryFilter.set('Tous');
+      this.ui.showToast('Catalogue réinitialisé.');
     }
   }
 

@@ -2,8 +2,10 @@ import { Injectable, computed, signal } from '@angular/core';
 import { PRODUCTS, CATEGORIES } from '../data/products';
 import { Product, Category, GarmentType, Size } from '../models/product';
 
-const PRODUCTS_KEY = 'follar.products.v2';
-const CATEGORIES_KEY = 'follar.categories.v2';
+const PRODUCTS_KEY = 'follar.products.v3';
+const LEGACY_PRODUCTS_KEY = 'follar.products.v2';
+const CATEGORIES_KEY = 'follar.categories.v3';
+const LEGACY_CATEGORIES_KEY = 'follar.categories.v2';
 
 @Injectable({ providedIn: 'root' })
 export class CatalogService {
@@ -49,6 +51,18 @@ export class CatalogService {
     });
   }
 
+  /** Restore the original FOLLAR catalogue (removes all local changes). */
+  resetProducts(): void {
+    const next = PRODUCTS.map((p) => ({ ...p }));
+    this.products.set(next);
+    this.saveProducts(next);
+  }
+
+  /** Replace one product's image without opening the full edition modal. */
+  updateProductImage(slug: string, imageUrl: string): void {
+    this.updateProduct(slug, { imageUrl: imageUrl.trim() || undefined });
+  }
+
   addCategory(category: string): void {
     const trimmed = category.trim();
     if (!trimmed || this.categories().includes(trimmed)) return;
@@ -84,15 +98,33 @@ export class CatalogService {
 
   private restoreProducts(): Product[] {
     try {
-      const raw = localStorage.getItem(PRODUCTS_KEY);
+      const raw = localStorage.getItem(PRODUCTS_KEY) || localStorage.getItem(LEGACY_PRODUCTS_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+          const migrated = parsed.map((p: Product) => this.withDefaultMedia(p));
+          this.saveProducts(migrated);
+          return migrated;
         }
       }
     } catch {}
     return PRODUCTS;
+  }
+
+  /**
+   * Older saved products (v2) had no local image. Re-attach the bundled
+   * catalogue photo when the slug matches, without overriding a custom image.
+   */
+  private withDefaultMedia(product: Product): Product {
+    const base = PRODUCTS.find((item) => item.slug === product.slug);
+    if (!base) return product;
+    return {
+      ...base,
+      ...product,
+      imageUrl: product.imageUrl || base.imageUrl,
+      palette: { ...base.palette, ...(product.palette ?? {}) },
+      details: { ...base.details, ...(product.details ?? {}) },
+    };
   }
 
   private saveProducts(list: Product[]): void {
@@ -103,7 +135,7 @@ export class CatalogService {
 
   private restoreCategories(): string[] {
     try {
-      const raw = localStorage.getItem(CATEGORIES_KEY);
+      const raw = localStorage.getItem(CATEGORIES_KEY) || localStorage.getItem(LEGACY_CATEGORIES_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) {

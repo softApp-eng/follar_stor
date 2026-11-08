@@ -39,6 +39,11 @@ testem.log
 /typings
 __screenshots__/
 
+# Spring Boot backend
+backend/follar-backend/target/
+backend/follar-backend/uploads/*
+!backend/follar-backend/uploads/.gitkeep
+
 # System files
 .DS_Store
 Thumbs.db
