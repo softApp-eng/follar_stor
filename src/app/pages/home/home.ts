@@ -4,6 +4,7 @@ import { CatalogService } from '../../core/services/catalog.service';
 import { CartService } from '../../core/services/cart.service';
 import { Product, GarmentType, Size, Category } from '../../core/models/product';
 import { UiService } from '../../core/services/ui.service';
+import { SettingsService } from '../../core/services/settings.service';
 import { GarmentComponent } from '../../shared/components/garment/garment';
 import { PieceOrbitComponent } from '../../shared/components/piece-orbit/piece-orbit';
 import { ProductCardComponent } from '../../shared/components/product-card/product-card';
@@ -33,6 +34,7 @@ export class HomePage {
   readonly ui = inject(UiService);
   readonly catalog = inject(CatalogService);
   readonly cart = inject(CartService);
+  readonly settings = inject(SettingsService);
 
   readonly categories = computed(() => this.catalog.categories());
   readonly families = computed(() =>
@@ -59,6 +61,12 @@ export class HomePage {
     this.customizer.update((c) => ({ ...c, [field]: value }));
   }
 
+  /** Photo choisie dans l'admin pour la silhouette en cours, si elle existe. */
+  readonly customizerImage = computed(() => {
+    const images = this.settings.settings().customizerImages ?? {};
+    return images[this.customizer().garment] || '';
+  });
+
   readonly previewCustomProduct = computed<Product>(() => {
     const c = this.customizer();
     return {
@@ -77,6 +85,7 @@ export class HomePage {
       origin: 'Atelier de Paris',
       season: 'Toute l’année',
       badge: 'Sur-mesure',
+      imageUrl: this.customizerImage() || undefined,
       palette: {
         aura: c.color,
         fabricA: c.color,

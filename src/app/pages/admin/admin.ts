@@ -29,10 +29,14 @@ export class AdminComponent {
   readonly activeTab = signal<AdminTab>('dashboard');
   readonly Number = Number;
 
+  constructor() {
+    this.auth.ensureValidSession();
+  }
+
   // --- LOGIN FORM STATE ---
   readonly loginUsername = signal('admin');
   readonly loginPassword = signal('follar2026');
-  readonly loginError = signal(false);
+  readonly loginError = signal('');
 
   // --- ARTICLES STATE ---
   readonly editingSlug = signal<string | null>(null);
@@ -123,6 +127,17 @@ export class AdminComponent {
   // --- APPEARANCE & SOCIAL STATE ---
   readonly settingsForm = signal(this.settingsService.settings());
 
+  readonly customizerGarments: Array<{ value: GarmentType; label: string }> = [
+    { value: 'coat', label: 'Manteau' },
+    { value: 'shirt', label: 'Chemise' },
+    { value: 'jeans', label: 'Jean' },
+    { value: 'knit', label: 'Pull / Maille' },
+    { value: 'trench', label: 'Trench' },
+    { value: 'tee', label: 'T-shirt' },
+    { value: 'trousers', label: 'Pantalon' },
+    { value: 'bag', label: 'Sac' },
+  ];
+
   // --- STATS ---
   readonly totalRevenue = computed(() =>
     this.orderService.orders().reduce((sum, o) => sum + o.total, 0),
@@ -136,12 +151,21 @@ export class AdminComponent {
 
   handleLogin(event: Event): void {
     event.preventDefault();
-    const success = this.auth.login(this.loginUsername(), this.loginPassword());
-    if (success) {
-      this.loginError.set(false);
+    const result = this.auth.login(this.loginUsername(), this.loginPassword());
+    if (result.ok) {
+      this.loginError.set('');
       this.ui.showToast('Connexion JWT réussie — Bienvenue dans l’administration.');
+      return;
+    }
+
+    if (result.error === 'inactive') {
+      this.loginError.set('Ce compte a été désactivé. Contactez le super-administrateur.');
+      this.ui.showToast('Compte désactivé.');
+    } else if (result.error === 'forbidden') {
+      this.loginError.set('Ce compte n’a pas les droits d’administration.');
+      this.ui.showToast('Accès refusé.');
     } else {
-      this.loginError.set(true);
+      this.loginError.set('Identifiants invalides. Utilisez admin / follar2026.');
       this.ui.showToast('Identifiants incorrects (Essayez admin / follar2026).');
     }
   }
@@ -397,15 +421,55 @@ export class AdminComponent {
   }
 
   // --- APPEARANCE & SOCIAL METHODS ---
-  saveSettings(event: Event): void {
-    event.preventDefault();
-    this.settingsService.update(this.settingsForm());
-    this.ui.showToast('Paramètres d’apparence et réseaux sociaux enregistrés.');
+  customizerImageFor(garment: GarmentType): string {
+    return this.settingsForm().customizerImages?.[garment] || '';
   }
 
-  resetSettings(): void {
-    this.settingsService.reset();
+  updateCustomizerImage(garment: GarmentType, imageUrl: string): void {
+    const value = imageUrl.trim();
+    this.settingsForm.update((settings) => {
+      const customizerImages = { ...(settings.customizerImages ?? {}) };
+      if (value) {
+        customizerImages[garment] = value;
+      } else {
+        delete customizerImages[garment];
+      }
+      return { ...settings, customizerImages };
+    });
+  }
+
+  async onCustomizerImageSelected(event: Event, garment: GarmentType): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      const imageUrl = await this.images.store(file);
+      this.updateCustomizerImage(garment, imageUrl);
+      this.ui.showToast('Photo sur-mesure chargée. Enregistrez pour publier.');
+    } catch (error) {
+      this.ui.showToast(error instanceof Error ? error.message : 'Import de l’image impossible.');
+    } finally {
+      input.value = '';
+    }
+  }
+
+  async saveSettings(event: Event): Promise<void> {
+    event.preventDefault();
+    const synced = await this.settingsService.update(this.settingsForm());
+    this.ui.showToast(
+      synced
+        ? 'Paramètres enregistrés dans la base de données.'
+        : 'Paramètres enregistrés dans le navigateur (backend hors ligne).',
+    );
+  }
+
+  async resetSettings(): Promise<void> {
+    const synced = await this.settingsService.reset();
     this.settingsForm.set(this.settingsService.settings());
-    this.ui.showToast('Apparence réinitialisée aux valeurs par défaut.');
+    this.ui.showToast(
+      synced
+        ? 'Apparence réinitialisée et enregistrée dans la base de données.'
+        : 'Apparence réinitialisée localement (backend hors ligne).',
+    );
   }
 }

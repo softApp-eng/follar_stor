@@ -9,9 +9,14 @@
 
   <header class="header" [class.is-scrolled]="scrolled()" [class.is-open]="ui.menuOpen()">
     <div class="header__bar container">
-      <a class="header__logo" routerLink="/" (click)="ui.closeMenu()" aria-label="FOLLAR — accueil">
-        <span class="header__mark" aria-hidden="true">F</span>
-        <span class="header__word">FOLLAR</span>
+      <a
+        class="header__logo"
+        routerLink="/"
+        (click)="ui.closeMenu()"
+        [attr.aria-label]="siteName() + ' — accueil'"
+      >
+        <span class="header__mark" aria-hidden="true">{{ siteInitial() }}</span>
+        <span class="header__word">{{ siteName() }}</span>
       </a>
 
       <nav class="header__nav" aria-label="Navigation principale">

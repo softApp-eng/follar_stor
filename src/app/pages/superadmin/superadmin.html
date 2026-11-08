@@ -1,0 +1,510 @@
+<div class="admin container">
+  <!-- ================= AUTH CHECK ================= -->
+  @if (!auth.isLoggedIn()) {
+    <div class="login-wrapper fade-in">
+      <div class="login-box">
+        <div class="login-brand">
+          <span class="admin__mark admin__mark--super">S</span>
+          <div>
+            <p class="eyebrow">Super administration · Accès réservé</p>
+            <h1>Comptes & statistiques</h1>
+          </div>
+        </div>
+
+        <p class="login-lead">
+          Gérez les comptes administrateurs, activez ou désactivez un accès et suivez
+          l’activité de la boutique.
+        </p>
+
+        @if (loginError()) {
+          <div class="login-error">{{ loginError() }}</div>
+        }
+
+        <form class="login-form" (submit)="handleLogin($event)">
+          <div class="form-group">
+            <label>Identifiant super-admin</label>
+            <input
+              type="text"
+              [value]="loginUsername()"
+              (input)="loginUsername.set($any($event.target).value)"
+              placeholder="superadmin"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Mot de passe</label>
+            <input
+              type="password"
+              [value]="loginPassword()"
+              (input)="loginPassword.set($any($event.target).value)"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+
+          <button class="btn btn--ink btn--block" type="submit">
+            <span>Accéder au super-admin</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+              <path d="M4 12h15M13 6l6 6-6 6" />
+            </svg>
+          </button>
+        </form>
+
+        <p class="login-demo">
+          Démo : <strong>superadmin</strong> / <strong>superfollar2026</strong>
+        </p>
+
+        <div class="login-foot">
+          <a routerLink="/">← Retour à la boutique</a>
+          <a routerLink="/admin">Panel admin →</a>
+        </div>
+      </div>
+    </div>
+  } @else if (!auth.isSuperAdmin()) {
+    <div class="super-denied fade-in">
+      <span class="admin__mark admin__mark--super">S</span>
+      <h1>Accès super-admin requis</h1>
+      <p>
+        Le compte <strong>{{ auth.username() }}</strong> est un compte administrateur standard.
+        Seul un super-admin peut gérer les comptes et consulter les statistiques globales.
+      </p>
+      <div class="super-denied__actions">
+        <a class="btn btn--ink" routerLink="/admin"><span>Ouvrir le panel admin</span></a>
+        <button class="btn btn--line" type="button" (click)="logout()">
+          <span>Changer de compte</span>
+        </button>
+      </div>
+    </div>
+  } @else {
+    <!-- ================= SUPER ADMIN HEADER ================= -->
+    <header class="admin__header">
+      <div class="admin__brand">
+        <span class="admin__mark admin__mark--super">S</span>
+        <div>
+          <p class="eyebrow">
+            Super administration · Session {{ auth.username() }} · Droits super-admin
+          </p>
+          <h1>Comptes & Statistiques</h1>
+        </div>
+      </div>
+
+      <div class="admin__actions">
+        <a class="btn btn--line" routerLink="/admin">
+          <span>Panel admin</span>
+        </a>
+        <button class="btn btn--line" type="button" (click)="logout()">
+          <span>Se déconnecter</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ================= TABS ================= -->
+    <nav class="admin__tabs" role="tablist" aria-label="Sections super-admin">
+      <button
+        type="button"
+        role="tab"
+        [class.is-active]="activeTab() === 'overview'"
+        [attr.aria-selected]="activeTab() === 'overview'"
+        (click)="setTab('overview')"
+      >
+        Vue d’ensemble
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [class.is-active]="activeTab() === 'accounts'"
+        [attr.aria-selected]="activeTab() === 'accounts'"
+        (click)="setTab('accounts')"
+      >
+        Comptes & accès <span>({{ totalAccounts() }})</span>
+      </button>
+    </nav>
+
+    <!-- ================= TAB: OVERVIEW ================= -->
+    @if (activeTab() === 'overview') {
+      <div class="admin__content fade-in">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-num">{{ revenue() }} €</span>
+            <span class="stat-label">Chiffre d’affaires cumulé</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">{{ totalOrders() }}</span>
+            <span class="stat-label">Commandes reçues</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">{{ averageOrder() }} €</span>
+            <span class="stat-label">Panier moyen</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">{{ activeAccounts() }}</span>
+            <span class="stat-label">Comptes actifs</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">{{ inactiveAccounts() }}</span>
+            <span class="stat-label">Comptes désactivés</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">{{ productCount() }}</span>
+            <span class="stat-label">Articles au catalogue</span>
+          </div>
+        </div>
+
+        <div class="super-cols">
+          <section class="quick-box super-chart">
+            <div class="super-panel-head">
+              <div>
+                <h3>Ventes des 6 derniers mois</h3>
+                <p>{{ pendingOrders() }} commande(s) à expédier · {{ deliveredOrders() }} livrée(s).</p>
+              </div>
+            </div>
+            <div class="bars">
+              @for (month of monthlySales(); track month.key) {
+                <div class="bar">
+                  <span class="bar__value">{{ month.revenue }} €</span>
+                  <div class="bar__track">
+                    <div class="bar__fill" [style.height.%]="barHeight(month.revenue)"></div>
+                  </div>
+                  <span class="bar__label">{{ month.label }}</span>
+                </div>
+              }
+            </div>
+          </section>
+
+          <section class="quick-box">
+            <div class="super-panel-head">
+              <div>
+                <h3>Meilleures ventes</h3>
+                <p>Classement par quantité vendue.</p>
+              </div>
+            </div>
+            @if (topProducts().length === 0) {
+              <p class="empty-text">Aucune vente enregistrée pour le moment.</p>
+            } @else {
+              <ul class="super-ranking">
+                @for (product of topProducts(); track product.slug; let i = $index) {
+                  <li>
+                    <span class="rank">{{ i + 1 }}</span>
+                    <div>
+                      <strong>{{ product.name }}</strong>
+                      <small>{{ product.qty }} vendu(s)</small>
+                    </div>
+                    <span>{{ product.revenue }} €</span>
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+        </div>
+
+        <section class="quick-box super-reco">
+          <div class="super-panel-head">
+            <div>
+              <h3>Recommandations e-commerce</h3>
+              <p>Priorités pour une boutique moderne, générées depuis vos données.</p>
+            </div>
+            <span class="reco-count">{{ recommendations().length }} priorités</span>
+          </div>
+          <ul class="reco-list">
+            @for (reco of recommendations(); track reco.title) {
+              <li>
+                <span class="reco-priority" [class]="'reco-priority reco-priority--' + priorityClass(reco.priority)">
+                  {{ reco.priority }}
+                </span>
+                <div>
+                  <strong>{{ reco.title }}</strong>
+                  <p>{{ reco.text }}</p>
+                </div>
+              </li>
+            }
+          </ul>
+        </section>
+
+        <div class="super-cols">
+          <section class="quick-box">
+            <div class="super-panel-head">
+              <div>
+                <h3>Journal d’activité</h3>
+                <p>{{ accountsThisMonth() }} compte(s) créé(s) ce mois-ci.</p>
+              </div>
+            </div>
+            @if (recentEvents().length === 0) {
+              <p class="empty-text">Aucune activité enregistrée pour le moment.</p>
+            } @else {
+              <ul class="activity-list">
+                @for (event of recentEvents(); track event.id) {
+                  <li>
+                    <span class="activity-dot" aria-hidden="true"></span>
+                    <div>
+                      <strong>{{ eventLabels[event.action] }} — {{ event.target }}</strong>
+                      <small>{{ event.date | date: 'dd/MM/yyyy HH:mm' }} · {{ event.actor }}</small>
+                    </div>
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+
+          <section class="quick-box">
+            <div class="super-panel-head">
+              <div>
+                <h3>Dernières commandes</h3>
+                <p>Suivi rapide des commandes récentes.</p>
+              </div>
+            </div>
+            @if (recentOrders().length === 0) {
+              <p class="empty-text">Aucune commande reçue.</p>
+            } @else {
+              <ul class="super-orders">
+                @for (order of recentOrders(); track order.id) {
+                  <li>
+                    <div>
+                      <strong>{{ order.id }}</strong>
+                      <small>{{ order.customer.fullName }} · {{ order.items.length }} article(s)</small>
+                    </div>
+                    <div class="super-orders__meta">
+                      <span>{{ order.total }} €</span>
+                      <span [class]="'order-status ' + orderStatusClass(order.status)">
+                        {{ order.status }}
+                      </span>
+                    </div>
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+        </div>
+      </div>
+    }
+
+    <!-- ================= TAB: ACCOUNTS ================= -->
+    @if (activeTab() === 'accounts') {
+      <div class="admin__content fade-in">
+        <div class="section-top">
+          <div>
+            <h2>Comptes administrateurs</h2>
+            <p>
+              {{ totalAccounts() }} compte(s) · {{ activeAccounts() }} actif(s) ·
+              {{ inactiveAccounts() }} désactivé(s) · {{ superAdminCount() }} super-admin(s).
+            </p>
+          </div>
+          <div class="section-top__actions">
+            <button class="btn btn--ink" type="button" (click)="openCreate()">
+              <span>+ Créer un compte</span>
+            </button>
+          </div>
+        </div>
+
+        @if (showForm()) {
+          <form class="account-form" (submit)="submitAccount($event)">
+            <div class="account-form__head">
+              <h3>{{ editingId() ? 'Modifier le compte' : 'Nouveau compte administrateur' }}</h3>
+              <button type="button" class="btn-text" (click)="cancelForm()" aria-label="Fermer">
+                Fermer ×
+              </button>
+            </div>
+
+            @if (formError()) {
+              <div class="login-error">{{ formError() }}</div>
+            }
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Nom complet</label>
+                <input
+                  type="text"
+                  [value]="accountForm().fullName"
+                  (input)="updateForm('fullName', $any($event.target).value)"
+                  placeholder="Camille Dubois"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Identifiant</label>
+                <input
+                  type="text"
+                  [value]="accountForm().username"
+                  (input)="updateForm('username', $any($event.target).value)"
+                  placeholder="camille"
+                  [disabled]="!!editingId()"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>E-mail</label>
+                <input
+                  type="email"
+                  [value]="accountForm().email"
+                  (input)="updateForm('email', $any($event.target).value)"
+                  placeholder="camille@follar.paris"
+                />
+              </div>
+
+              <div class="form-group">
+                <label>
+                  {{ editingId() ? 'Nouveau mot de passe (optionnel)' : 'Mot de passe' }}
+                </label>
+                <input
+                  type="password"
+                  autocomplete="new-password"
+                  [value]="accountForm().password"
+                  (input)="updateForm('password', $any($event.target).value)"
+                  placeholder="6 caractères minimum"
+                  [required]="!editingId()"
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Rôle</label>
+                <select
+                  [value]="accountForm().role"
+                  (change)="updateForm('role', $any($event.target).value)"
+                >
+                  <option value="admin">Administrateur</option>
+                  <option value="superadmin">Super-admin</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Statut du compte</label>
+                <label class="checkline">
+                  <input
+                    type="checkbox"
+                    [checked]="accountForm().active"
+                    (change)="updateForm('active', $any($event.target).checked)"
+                  />
+                  <span>Compte actif (connexion autorisée)</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn--ink" type="submit">
+                <span>{{ editingId() ? 'Enregistrer les modifications' : 'Créer le compte' }}</span>
+              </button>
+              <button class="btn btn--line" type="button" (click)="cancelForm()">
+                Annuler
+              </button>
+            </div>
+          </form>
+        }
+
+        <div class="article-toolbar">
+          <label class="article-toolbar__search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+            </svg>
+            <input
+              type="search"
+              placeholder="Rechercher un compte, un nom, un e-mail..."
+              [value]="search()"
+              (input)="search.set($any($event.target).value)"
+            />
+          </label>
+
+          <select
+            class="article-toolbar__select"
+            [value]="roleFilter()"
+            (change)="roleFilter.set($any($event.target).value)"
+          >
+            <option value="tous">Tous les rôles</option>
+            <option value="admin">Administrateurs</option>
+            <option value="superadmin">Super-admins</option>
+          </select>
+
+          <select
+            class="article-toolbar__select"
+            [value]="statusFilter()"
+            (change)="statusFilter.set($any($event.target).value)"
+          >
+            <option value="tous">Tous les statuts</option>
+            <option value="actifs">Actifs</option>
+            <option value="inactifs">Désactivés</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table class="admin-table super-table">
+            <thead>
+              <tr>
+                <th>Compte</th>
+                <th>Contact</th>
+                <th>Rôle</th>
+                <th>Statut</th>
+                <th>Créé le</th>
+                <th>Dernière connexion</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (account of filteredAccounts(); track account.id) {
+                <tr [class.is-inactive]="!account.active">
+                  <td>
+                    <strong>{{ account.username }}</strong>
+                    <small>
+                      {{ account.fullName }}
+                      @if (isSelf(account)) {
+                        · vous
+                      }
+                    </small>
+                  </td>
+                  <td><small>{{ account.email || '—' }}</small></td>
+                  <td>
+                    <span class="tag-pill" [class.tag-pill--super]="account.role === 'superadmin'">
+                      {{ roleLabel(account.role) }}
+                    </span>
+                  </td>
+                  <td>
+                    <button
+                      class="status-toggle"
+                      type="button"
+                      [class.is-on]="account.active"
+                      [disabled]="isSelf(account)"
+                      (click)="toggleActive(account)"
+                      [attr.aria-label]="account.active ? 'Désactiver le compte' : 'Activer le compte'"
+                    >
+                      <span class="status-toggle__dot" aria-hidden="true"></span>
+                      {{ account.active ? 'Actif' : 'Désactivé' }}
+                    </button>
+                  </td>
+                  <td><small>{{ account.createdAt | date: 'dd/MM/yyyy' }}</small></td>
+                  <td>
+                    <small>
+                      {{ account.lastLoginAt ? (account.lastLoginAt | date: 'dd/MM/yyyy HH:mm') : 'Jamais' }}
+                    </small>
+                  </td>
+                  <td class="col-actions">
+                    <button class="btn-action" type="button" (click)="openEdit(account)">
+                      Modifier
+                    </button>
+                    <button
+                      class="btn-action btn-action--danger"
+                      type="button"
+                      [disabled]="isSelf(account)"
+                      (click)="deleteAccount(account)"
+                    >
+                      Supprimer
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" class="empty-text">Aucun compte ne correspond à votre recherche.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <p class="account-note">
+          Démo front-end : les comptes et le journal sont conservés dans le navigateur
+          (localStorage). En production, cette gestion doit être déplacée côté serveur
+          (Spring Boot + JWT + mots de passe hachés).
+        </p>
+      </div>
+    }
+  }
+</div>

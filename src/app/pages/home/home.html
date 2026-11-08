@@ -145,7 +145,15 @@
         <div class="customizer__preview" [style.background]="customizer().colorBg">
           <span class="customizer__badge">Création libre</span>
           <div class="customizer__garment-box">
-            <app-garment [product]="previewCustomProduct()" [animated]="true" />
+            @if (customizerImage()) {
+              <img
+                class="customizer__image"
+                [src]="customizerImage()"
+                [alt]="customizer().name || 'Pièce sur-mesure'"
+              />
+            } @else {
+              <app-garment [product]="previewCustomProduct()" [animated]="true" />
+            }
           </div>
           <div class="customizer__preview-meta">
             <strong>{{ customizer().name || 'Votre Pièce' }}</strong>

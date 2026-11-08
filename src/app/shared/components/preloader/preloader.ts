@@ -1,5 +1,6 @@
-import { Component, DestroyRef, afterNextRender, inject, signal } from '@angular/core';
+import { Component, DestroyRef, afterNextRender, computed, inject, signal } from '@angular/core';
 import { UiService } from '../../../core/services/ui.service';
+import { SettingsService } from '../../../core/services/settings.service';
 
 @Component({
   selector: 'app-preloader',
@@ -8,11 +9,11 @@ import { UiService } from '../../../core/services/ui.service';
       <div class="preloader" [class.is-leaving]="leaving()" aria-hidden="true">
         <div class="preloader__inner">
           <div class="preloader__brand">
-            @for (letter of letters; track $index) {
+            @for (letter of letters(); track $index) {
               <span [style.animation-delay.ms]="140 + $index * 58">{{ letter }}</span>
             }
           </div>
-          <p class="preloader__tag">Vestiaire essentiel · Paris</p>
+          <p class="preloader__tag">{{ settings.settings().tagline }}</p>
           <div class="preloader__line"><i></i></div>
         </div>
       </div>
@@ -107,12 +108,18 @@ import { UiService } from '../../../core/services/ui.service';
   `,
 })
 export class PreloaderComponent {
-  readonly letters = ['F', 'O', 'L', 'L', 'A', 'R'];
-  readonly leaving = signal(false);
-  readonly done = signal(false);
-
+  readonly settings = inject(SettingsService);
   private readonly ui = inject(UiService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly letters = computed(() =>
+    (this.settings.settings().siteName || 'FOLLAR')
+      .replace(/\s+/g, '')
+      .slice(0, 12)
+      .split(''),
+  );
+  readonly leaving = signal(false);
+  readonly done = signal(false);
 
   constructor() {
     afterNextRender(() => {

@@ -1,9 +1,10 @@
-import { Component, HostListener, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CartService } from '../../../core/services/cart.service';
 import { UiService } from '../../../core/services/ui.service';
+import { SettingsService } from '../../../core/services/settings.service';
 
 interface NavLink {
   label: string;
@@ -19,6 +20,10 @@ interface NavLink {
 export class HeaderComponent {
   readonly cart = inject(CartService);
   readonly ui = inject(UiService);
+  readonly settings = inject(SettingsService);
+
+  readonly siteName = computed(() => this.settings.settings().siteName || 'FOLLAR');
+  readonly siteInitial = computed(() => this.siteName().trim().charAt(0).toUpperCase() || 'F');
 
   readonly links: NavLink[] = [
     { label: 'Collection', fragment: 'collection' },

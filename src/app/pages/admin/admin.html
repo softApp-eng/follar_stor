@@ -16,9 +16,7 @@
         </p>
 
         @if (loginError()) {
-          <div class="login-error">
-            Identifiants invalides. Utilisez <strong>admin</strong> / <strong>follar2026</strong>.
-          </div>
+          <div class="login-error">{{ loginError() }}</div>
         }
 
         <form class="login-form" (submit)="handleLogin($event)">
@@ -54,7 +52,7 @@
 
         <div class="login-foot">
           <a routerLink="/">← Retour à la boutique</a>
-          <small>Mode démo Spring Boot / H2 / JWT</small>
+          <a routerLink="/superadmin">Accès Super Admin →</a>
         </div>
       </div>
     </div>
@@ -443,6 +441,17 @@
           </div>
         </div>
 
+        <p class="settings-sync" [class.is-synced]="settingsService.storageStatus() === 'synced'">
+          <span class="settings-sync__dot" aria-hidden="true"></span>
+          @if (settingsService.storageStatus() === 'synced') {
+            Synchronisé avec la base de données (H2). Le nom et les couleurs s'appliquent
+            immédiatement au header, au footer et à tout le site.
+          } @else {
+            Backend hors ligne : les modifications sont conservées dans le navigateur.
+            Démarrez le backend Spring Boot pour les enregistrer en base.
+          }
+        </p>
+
         <form class="settings-form" (submit)="saveSettings($event)">
           <div class="form-group">
             <label>Nom du site / Marque</label>
@@ -567,6 +576,64 @@
                   (input)="settingsForm.update(s => ({ ...s, bgColor: $any($event.target).value }))"
                 />
               </div>
+            </div>
+          </div>
+
+          <div class="customizer-images">
+            <div class="customizer-images__head">
+              <h3>Images de l'atelier sur-mesure</h3>
+              <p>
+                Remplacez le dessin automatique par une photo pour chaque silhouette. Laissez le champ
+                vide pour conserver l'illustration. Enregistrez pour publier les changements.
+              </p>
+            </div>
+
+            <div class="customizer-images__grid">
+              @for (item of customizerGarments; track item.value) {
+                <article class="customizer-image">
+                  <div class="customizer-image__preview">
+                    @if (customizerImageFor(item.value)) {
+                      <img
+                        [src]="customizerImageFor(item.value)"
+                        [alt]="'Aperçu sur-mesure — ' + item.label"
+                      />
+                    } @else {
+                      <span>{{ item.label }}</span>
+                    }
+                  </div>
+
+                  <strong>{{ item.label }}</strong>
+
+                  <input
+                    type="text"
+                    inputmode="url"
+                    [value]="customizerImageFor(item.value)"
+                    (input)="updateCustomizerImage(item.value, $any($event.target).value)"
+                    placeholder="/images/… ou https://…"
+                  />
+
+                  <div class="customizer-image__actions">
+                    <label class="btn-action btn-action--upload">
+                      <span>Importer</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        (change)="onCustomizerImageSelected($event, item.value)"
+                        hidden
+                      />
+                    </label>
+                    @if (customizerImageFor(item.value)) {
+                      <button
+                        type="button"
+                        class="btn-action btn-action--danger"
+                        (click)="updateCustomizerImage(item.value, '')"
+                      >
+                        Retirer
+                      </button>
+                    }
+                  </div>
+                </article>
+              }
             </div>
           </div>
 
@@ -909,7 +976,7 @@
           <div class="print-sheet-content">
             <div class="print-header-brand">
               <div>
-                <h2>FOLLAR — FICHE TECHNIQUE ARTICLE</h2>
+                <h2>{{ settingsService.settings().siteName }} — FICHE TECHNIQUE ARTICLE</h2>
                 <p>Édition atelier & logistique</p>
               </div>
               <div class="print-ref">REF: {{ pa.slug | uppercase }}</div>

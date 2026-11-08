@@ -18,6 +18,12 @@ export const routes: Routes = [
       import('./pages/admin/admin').then((m) => m.AdminComponent),
   },
   {
+    path: 'superadmin',
+    title: 'Super Administration — FOLLAR',
+    loadComponent: () =>
+      import('./pages/superadmin/superadmin').then((m) => m.SuperAdminComponent),
+  },
+  {
     path: '**',
     redirectTo: '',
   },

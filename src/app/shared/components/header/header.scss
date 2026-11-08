@@ -136,6 +136,14 @@
   letter-spacing: 0.24em;
   line-height: 1;
   text-transform: uppercase;
+  max-width: 38vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  @media (min-width: 900px) {
+    max-width: none;
+  }
 }
 
 /* Nav --------------------------------------------------------------------- */
